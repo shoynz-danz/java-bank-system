@@ -2,10 +2,11 @@ package bank;
 
 public class TransferService {
     private final CommissionPolicy commissionPolicy;
+    private final NotificationService notificationService;
 
-    // Теперь объект CommissionPolicy должен передаваться в него через конструктор:
-    public TransferService(CommissionPolicy commissionPolicy) {
+    public TransferService(CommissionPolicy commissionPolicy, NotificationService notificationService) {
         this.commissionPolicy = commissionPolicy;
+        this.notificationService = notificationService;
     }
 
     public boolean transfer(BankAccount from, BankAccount to, double amount) {
@@ -18,15 +19,29 @@ public class TransferService {
 
         boolean withdrawSuccess = from.withdraw(totalToWithdraw);
         if (!withdrawSuccess) {
+            // при неуспешном переводе уведомление не отправляется!
             return false;
         }
 
         to.deposit(amount);
+
+        notificationService.notify("Transfer " + amount + " completed");
+
         return true;
     }
 }
-// Изменённый код, этап 4
-// Внедряем политику комиссии через конструктор
-// 1. Считаем комиссию и общую сумму к списанию
-// 2. Списываем с отправителя СУММУ С КОМИССИЕЙ
-// 3. Получателю начисляем сумму перевода
+
+/*
+ОБНОВЛЕННЫЙ КОД для ЭТАП 5
+Он должен получать обе зависимости через конструктор:
+
+public TransferService(
+        CommissionPolicy commissionPolicy,
+        NotificationService notificationService) {
+    ...
+}
+
+После успешного перевода должно отправляться уведомление.
+
+При неуспешном переводе уведомление отправляться не должно.
+ */
