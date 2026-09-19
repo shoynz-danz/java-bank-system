@@ -1,13 +1,22 @@
 package bank;
 
 public class TransferService {
+    private final CommissionPolicy commissionPolicy;
+
+    // Теперь объект CommissionPolicy должен передаваться в него через конструктор:
+    public TransferService(CommissionPolicy commissionPolicy) {
+        this.commissionPolicy = commissionPolicy;
+    }
 
     public boolean transfer(BankAccount from, BankAccount to, double amount) {
         if (amount <= 0 || from == null || to == null || from == to) {
             return false;
         }
-        boolean withdrawSuccess = from.withdraw(amount);
 
+        double commission = commissionPolicy.calculate(amount);
+        double totalToWithdraw = amount + commission;
+
+        boolean withdrawSuccess = from.withdraw(totalToWithdraw);
         if (!withdrawSuccess) {
             return false;
         }
@@ -16,14 +25,8 @@ public class TransferService {
         return true;
     }
 }
-
-/*
-Правила перевода
-
-1. Сумма перевода должна быть больше нуля.
-2. Нельзя переводить деньги со счёта на тот же самый счёт.
-3. Списание выполняется по правилам конкретного типа счёта.
-4. Если списание невозможно, перевод считается неуспешным.
-5. При неуспешном переводе баланс получателя не должен измениться.
-6. При успешном переводе деньги списываются со счёта отправителя и зачисляются получателю.
- */
+// Изменённый код, этап 4
+// Внедряем политику комиссии через конструктор
+// 1. Считаем комиссию и общую сумму к списанию
+// 2. Списываем с отправителя СУММУ С КОМИССИЕЙ
+// 3. Получателю начисляем сумму перевода
