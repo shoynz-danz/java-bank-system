@@ -135,4 +135,38 @@ public class TransferServiceTest {
         assertEquals(2000.0, savings.getBalance());
         assertEquals(7000.0, debit.getBalance());
     }
+
+    // 9 ЭТАП: Проверка уведомлений через Fake-объект
+
+    @Test
+    void notificationSentOnSuccessfulTransfer() {
+        // ПОДГОТОВКА
+        DebitAccount from = new DebitAccount("1", "Ivan", 5000.0);
+        DebitAccount to = new DebitAccount("2", "Petr", 1000.0);
+        FakeNotificationService fakeNotifier = new FakeNotificationService();
+        TransferService service = new TransferService(new NoCommission(), fakeNotifier);
+
+        // Действие
+        service.transfer(from, to, 3000.0);
+
+        // проверка: отправлено ровно 1 уведомление и с правильным текстом
+        assertEquals(1, fakeNotifier.getNotificationCount());
+        assertEquals("Transfer 3000.0 completed", fakeNotifier.getLastMessage());
+    }
+
+    @Test
+    void notificationNotSentOnFailedTransfer() {
+        // подготовк
+        DebitAccount from = new DebitAccount("1", "Ivan", 1000.0);
+        DebitAccount to = new DebitAccount("2", "Petr", 1000.0);
+        FakeNotificationService fakeNotifier = new FakeNotificationService();
+        TransferService service = new TransferService(new NoCommission(), fakeNotifier);
+
+        // действие переводим больше, чем есть
+        service.transfer(from, to, 5000.0);
+
+        // провеерка уведомлений быть не должно
+        assertEquals(0, fakeNotifier.getNotificationCount());
+        assertNull(fakeNotifier.getLastMessage());
+    }
 }
