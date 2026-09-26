@@ -35,6 +35,8 @@ public class Main {
         System.out.println("acc2: " + acc2.getBalance());
 
         System.out.println(service.transfer(acc1, acc2, 20000)); // ложь
+
+        System.out.println(debit);
     }
 }
 

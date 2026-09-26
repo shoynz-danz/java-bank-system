@@ -45,4 +45,9 @@ public abstract class BankAccount {
     protected void setBalance(double balance) {
         this.balance = balance;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{ number='" + number + "', owner='" + owner + "', balance=" + balance + " }";
+    }
 }
