@@ -58,6 +58,26 @@ public class Main {
         AccountNumber num = new AccountNumber("1234567890");
         System.out.println("Номер валидный: " + num.value());
         // new AccountNumber("123"); ошибка уже
+
+        System.out.println("----------------------");
+        System.out.println("26.09 7 этап: транзакции");
+
+        Transaction tx1 = new Transaction(
+                TransactionType.DEPOSIT,
+                new AccountNumber("1234567890"),
+                5000,
+                TransactionStatus.SUCCESS
+        );
+
+        Transaction tx2 = new Transaction(
+                TransactionType.WITHDRAWAL,
+                new AccountNumber("0000000001"),
+                3000,
+                TransactionStatus.REJECTED
+        );
+
+        System.out.println(tx1);
+        System.out.println(tx2);
     }
 }
 
