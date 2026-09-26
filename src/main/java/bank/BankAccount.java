@@ -1,26 +1,26 @@
 package bank;
+
 import java.util.Objects;
 
 public abstract class BankAccount {
-    private final String number;
+    private final AccountNumber number;
     private final String owner;
     private double balance;
 
-    /*
-    1. Номер счёта после создания изменяться не должен.
-    2. Владелец счёта после создания изменяться не должен.
-    3. Баланс нельзя изменять напрямую из других классов.
-    4. Пополнение на нулевую или отрицательную сумму не должно изменять баланс.
-    5. Начальный баланс не должен быть отрицательным.
-     */
-
-    protected BankAccount(String number, String owner, double initialBalance) {
+    protected BankAccount(AccountNumber number, String owner, double initialBalance) {
+        if (number == null) {
+            throw new IllegalArgumentException("Номер счета не может быть null");
+        }
         if (initialBalance < 0) {
             throw new IllegalArgumentException("Баланс отрицательный!!!");
         }
         this.number = number;
         this.owner = owner;
         this.balance = initialBalance;
+    }
+
+    protected BankAccount(String number, String owner, double initialBalance) {
+        this(new AccountNumber(number), owner, initialBalance);
     }
 
     public void deposit(double amount) {
@@ -35,7 +35,7 @@ public abstract class BankAccount {
         return balance;
     }
 
-    public String getNumber() {
+    public AccountNumber getNumber() {
         return number;
     }
 
@@ -49,7 +49,7 @@ public abstract class BankAccount {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{ number='" + number + "', owner='" + owner + "', balance=" + balance + " }";
+        return getClass().getSimpleName() + "{ number='" + number.value() + "', owner='" + owner + "', balance=" + balance + " }";
     }
 
     @Override
