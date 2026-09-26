@@ -36,7 +36,22 @@ public class Main {
 
         System.out.println(service.transfer(acc1, acc2, 20000)); // ложь
 
+        System.out.println("----------------------");
+        System.out.println("26.09 1 этап:");
         System.out.println(debit);
+
+        System.out.println("----------------------");
+        System.out.println("26.09: проверка equals и hashCode");
+        BankAccount a = new DebitAccount("001", "лёха", 1000);
+        BankAccount b = new CreditAccount("001", "Пятачок", 5000, 2000);
+        BankAccount c = new DebitAccount("002", "Кабачок", 1000);
+        BankAccount s = new SavingsAccount("001", "Кент", 1000, 500);
+
+        System.out.println(a.equals(b)); //  дебет == кредит
+        System.out.println(a.equals(s)); // дебет == копилка
+        System.out.println(b.equals(s)); // кредит == копилка
+        System.out.println(a.equals(c)); //тразные номера счетов
+        System.out.println(a.hashCode() == b.hashCode());
     }
 }
 

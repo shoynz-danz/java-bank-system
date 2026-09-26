@@ -1,4 +1,5 @@
 package bank;
+import java.util.Objects;
 
 public abstract class BankAccount {
     private final String number;
@@ -49,5 +50,18 @@ public abstract class BankAccount {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "{ number='" + number + "', owner='" + owner + "', balance=" + balance + " }";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof BankAccount)) return false;
+        BankAccount other = (BankAccount) obj;
+        return Objects.equals(number, other.number);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(number);
     }
 }
