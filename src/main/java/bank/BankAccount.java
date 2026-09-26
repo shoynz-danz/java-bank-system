@@ -24,9 +24,14 @@ public abstract class BankAccount {
     }
 
     public void deposit(double amount) {
-        if (amount > 0) {
-            this.balance += amount;
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Amount must be positive");
         }
+        increaseBalance(amount);
+    }
+
+    private void increaseBalance(double amount) {
+        this.balance += amount;
     }
 
     public abstract boolean withdraw(double amount);
