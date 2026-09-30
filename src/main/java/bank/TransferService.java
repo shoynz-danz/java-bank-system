@@ -1,6 +1,10 @@
 package bank;
 
 public class TransferService {
+
+    // максимальная сумма одного перевода
+    private static final double TRANSFER_LIMIT = 50_000;
+
     private final CommissionPolicy commissionPolicy;
     private final NotificationService notificationService;
 
@@ -9,39 +13,33 @@ public class TransferService {
         this.notificationService = notificationService;
     }
 
-    public boolean transfer(BankAccount from, BankAccount to, double amount) {
-        if (amount <= 0 || from == null || to == null || from == to) {
-            return false;
+    public void transfer(BankAccount from, BankAccount to, double amount) {
+        // сначала все проверки, потом уже движение денег
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Amount must be positive");
         }
 
+        if (from == null || to == null) {
+            throw new IllegalArgumentException("Accounts must not be null");
+        }
+
+        if (from == to) {
+            throw new IllegalArgumentException("Cannot transfer to the same account");
+        }
+
+        if (amount > TRANSFER_LIMIT) {
+            throw new TransferLimitExceededException("Transfer limit exceeded");
+        }
+
+        // снимаем с отправителя сумму вместе с комиссией,
+        // если денег не хватит - InsufficientFundsException уйдёт наружу
+        // и до получателя мы не дойдём
         double commission = commissionPolicy.calculate(amount);
-        double totalToWithdraw = amount + commission;
+        from.withdraw(amount + commission);
 
-        try {
-            from.withdraw(totalToWithdraw);
-        } catch (InsufficientFundsException | IllegalArgumentException e) {
-            return false;
-        }
-
+        // деньги зачисляем только после успешного списания
         to.deposit(amount);
 
         notificationService.notify("Transfer " + amount + " completed");
-
-        return true;
     }
 }
-
-/*
-ОБНОВЛЕННЫЙ КОД для ЭТАП 5
-Он должен получать обе зависимости через конструктор:
-
-public TransferService(
-        CommissionPolicy commissionPolicy,
-        NotificationService notificationService) {
-    ...
-}
-
-После успешного перевода должно отправляться уведомление.
-
-При неуспешном переводе уведомление отправляться не должно.
- */

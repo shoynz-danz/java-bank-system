@@ -33,6 +33,9 @@ public class Main {
             System.out.println("кредитка: лимит превыше");
         }
         System.out.println("кредитка: " + credit.getBalance());
+
+        System.out.println("----------------------");
+        System.out.println("26.09 11 этап: переводы");
         // переводы и комиссия
         TransferService service = new TransferService(
                 new PercentCommission(1.0), // комиссия 1 проц
@@ -42,11 +45,41 @@ public class Main {
         DebitAccount acc1 = new DebitAccount("0000000004", "Alex", 11000);
         DebitAccount acc2 = new DebitAccount("0000000005", "Bob", 2000);
 
-        System.out.println(service.transfer(acc1, acc2, 3000)); // тру
+        try {
+            service.transfer(acc1, acc2, 3000); // тут всё ок
+            System.out.println("перевод прошёл");
+        } catch (RuntimeException e) {
+            System.out.println("перевод не прошёл: " + e.getMessage());
+        }
         System.out.println("acc1: " + acc1.getBalance());
         System.out.println("acc2: " + acc2.getBalance());
 
-        System.out.println(service.transfer(acc1, acc2, 20000)); // ложь
+        try {
+            service.transfer(acc1, acc2, -500); // отрицательная сумма
+        } catch (IllegalArgumentException e) {
+            System.out.println("перевод не прошёл: " + e.getMessage());
+        }
+
+        try {
+            service.transfer(acc1, acc1, 1000); // себе самому
+        } catch (IllegalArgumentException e) {
+            System.out.println("перевод не прошёл: " + e.getMessage());
+        }
+
+        try {
+            service.transfer(acc1, acc2, 20000); // не хватит денег
+        } catch (InsufficientFundsException e) {
+            System.out.println("перевод не прошёл: " + e.getMessage());
+        }
+
+        try {
+            service.transfer(acc1, acc2, 60000); // выше лимита 50 000
+        } catch (TransferLimitExceededException e) {
+            System.out.println("перевод не прошёл: " + e.getMessage());
+        }
+        // после всех ошибок баланс acc1 не изменился
+        System.out.println("acc1: " + acc1.getBalance());
+        System.out.println("acc2: " + acc2.getBalance());
 
         System.out.println("----------------------");
         System.out.println("26.09 1 этап:");
