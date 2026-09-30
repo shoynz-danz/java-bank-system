@@ -4,23 +4,35 @@ public class Main {
     public static void main(String[] args) {
         // дебетовый и накопительный
         DebitAccount debit = new DebitAccount("0000000001", "Ivan", 10000);
-        System.out.println(debit.withdraw(8000)); // тру
+        debit.withdraw(8000); // просто вызываем
         System.out.println("дебет: " + debit.getBalance());
-        System.out.println(debit.withdraw(3000));
-        System.out.println("дебет: " + debit.getBalance()); // ложь
+
+        try {
+            debit.withdraw(3000); // тут упадет ошибка
+        } catch (InsufficientFundsException e) {
+            System.out.println("дебет: не хватило денег!");
+        }
 
         SavingsAccount savings = new SavingsAccount("0000000002", "Petr", 10000, 1000);
-        System.out.println(savings.withdraw(8500));
-        System.out.println(savings.withdraw(1000));
+        savings.withdraw(8500);
+        try {
+            savings.withdraw(1000); // не хватит из-за неснижаемого остатка
+        } catch (InsufficientFundsException e) {
+            System.out.println("накоп: не хватило денег!");
+        }
         System.out.println("накоп: " + savings.getBalance());
 
         // кредитка
         CreditAccount credit = new CreditAccount("0000000003", "Anna", 1000, 5000);
-        System.out.println(credit.withdraw(4000)); // тру, ушли в -3000
-        System.out.println("кредитка: " + credit.getBalance());
-        System.out.println(credit.withdraw(3000)); // ложь, превысили лимит
+        credit.withdraw(4000); // ушли в -3000
         System.out.println("кредитка: " + credit.getBalance());
 
+        try {
+            credit.withdraw(3000); // превысит лимит 5000
+        } catch (InsufficientFundsException e) {
+            System.out.println("кредитка: лимит превыше");
+        }
+        System.out.println("кредитка: " + credit.getBalance());
         // переводы и комиссия
         TransferService service = new TransferService(
                 new PercentCommission(1.0), // комиссия 1 проц

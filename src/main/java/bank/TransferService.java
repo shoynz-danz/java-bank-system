@@ -17,9 +17,9 @@ public class TransferService {
         double commission = commissionPolicy.calculate(amount);
         double totalToWithdraw = amount + commission;
 
-        boolean withdrawSuccess = from.withdraw(totalToWithdraw);
-        if (!withdrawSuccess) {
-            // при неуспешном переводе уведомление не отправляется!
+        try {
+            from.withdraw(totalToWithdraw);
+        } catch (InsufficientFundsException | IllegalArgumentException e) {
             return false;
         }
 
