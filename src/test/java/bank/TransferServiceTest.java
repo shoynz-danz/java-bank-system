@@ -39,26 +39,14 @@ public class TransferServiceTest {
         assertEquals(5000.0, to.getBalance());
     }
 
-    @Test
-    void failedTransferDoesNotChangeAnyBalance() {
-        DebitAccount from = new DebitAccount("0000000001", "Ivan", 1000.0);
-        DebitAccount to = new DebitAccount("0000000002", "Petr", 2000.0);
-        TransferService service = new TransferService(new NoCommission(), notificationService);
-
-        // Денег не хватает
-        assertThrows(InsufficientFundsException.class, () -> service.transfer(from, to, 3000.0));
-
-        assertEquals(1000.0, from.getBalance());
-        assertEquals(2000.0, to.getBalance());
-    }
+    // 12 ЭТАП: тесты на исключения
 
     @Test
-    void cannotTransferZeroOrNegativeAmount() {
+    void negativeTransferThrowsException() {
         DebitAccount from = new DebitAccount("0000000001", "Ivan", 5000.0);
         DebitAccount to = new DebitAccount("0000000002", "Petr", 2000.0);
         TransferService service = new TransferService(new NoCommission(), notificationService);
 
-        assertThrows(IllegalArgumentException.class, () -> service.transfer(from, to, 0.0));
         assertThrows(IllegalArgumentException.class, () -> service.transfer(from, to, -500.0));
 
         assertEquals(5000.0, from.getBalance());
@@ -66,7 +54,19 @@ public class TransferServiceTest {
     }
 
     @Test
-    void cannotTransferToSameAccount() {
+    void zeroTransferThrowsException() {
+        DebitAccount from = new DebitAccount("0000000001", "Ivan", 5000.0);
+        DebitAccount to = new DebitAccount("0000000002", "Petr", 2000.0);
+        TransferService service = new TransferService(new NoCommission(), notificationService);
+
+        assertThrows(IllegalArgumentException.class, () -> service.transfer(from, to, 0.0));
+
+        assertEquals(5000.0, from.getBalance());
+        assertEquals(2000.0, to.getBalance());
+    }
+
+    @Test
+    void transferToSameAccountThrowsException() {
         DebitAccount account = new DebitAccount("0000000001", "Ivan", 5000.0);
         TransferService service = new TransferService(new NoCommission(), notificationService);
 
@@ -76,15 +76,36 @@ public class TransferServiceTest {
     }
 
     @Test
-    void cannotTransferMoreThanLimit() {
+    void transferWithoutEnoughMoneyThrowsException() {
+        DebitAccount from = new DebitAccount("0000000001", "Ivan", 1000.0);
+        DebitAccount to = new DebitAccount("0000000002", "Petr", 2000.0);
+        TransferService service = new TransferService(new NoCommission(), notificationService);
+
+        // забираем само исключение, чтобы глянуть сообщение
+        InsufficientFundsException ex = assertThrows(
+                InsufficientFundsException.class,
+                () -> service.transfer(from, to, 5000.0)
+        );
+        assertEquals("Insufficient funds", ex.getMessage());
+
+        // при ошибке получатель ничего не получил
+        assertEquals(1000.0, from.getBalance());
+        assertEquals(2000.0, to.getBalance());
+    }
+
+    @Test
+    void transferOverLimitThrowsException() {
         DebitAccount from = new DebitAccount("0000000001", "Ivan", 100000.0);
         DebitAccount to = new DebitAccount("0000000002", "Petr", 0.0);
         TransferService service = new TransferService(new NoCommission(), notificationService);
 
-        // Лимит 50 000, а тут переводим больше
-        assertThrows(TransferLimitExceededException.class, () -> service.transfer(from, to, 50001.0));
+        // лимит 50 000, а тут переводим больше
+        TransferLimitExceededException ex = assertThrows(
+                TransferLimitExceededException.class,
+                () -> service.transfer(from, to, 50001.0)
+        );
+        assertEquals("Transfer limit exceeded", ex.getMessage());
 
-        // при ошибке ни один баланс не меняется
         assertEquals(100000.0, from.getBalance());
         assertEquals(0.0, to.getBalance());
     }
