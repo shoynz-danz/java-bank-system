@@ -87,10 +87,6 @@ public class TransferServiceTest {
                 () -> service.transfer(from, to, 5000.0)
         );
         assertEquals("Insufficient funds", ex.getMessage());
-
-        // при ошибке получатель ничего не получил
-        assertEquals(1000.0, from.getBalance());
-        assertEquals(2000.0, to.getBalance());
     }
 
     @Test
@@ -106,6 +102,56 @@ public class TransferServiceTest {
         );
         assertEquals("Transfer limit exceeded", ex.getMessage());
 
+        assertEquals(100000.0, from.getBalance());
+        assertEquals(0.0, to.getBalance());
+    }
+
+    // 13 ЭТАП: состояние системы после ошибки
+
+    @Test
+    void failedTransferDoesNotChangeBalances() {
+        DebitAccount from = new DebitAccount("0000000001", "Ivan", 1000.0);
+        DebitAccount to = new DebitAccount("0000000002", "Petr", 2000.0);
+        TransferService service = new TransferService(new NoCommission(), notificationService);
+
+        assertThrows(
+                InsufficientFundsException.class,
+                () -> service.transfer(from, to, 5000.0)
+        );
+
+        // после ошибки оба баланса остались как были
+        assertEquals(1000.0, from.getBalance());
+        assertEquals(2000.0, to.getBalance());
+    }
+
+    @Test
+    void failedTransferWithCommissionDoesNotChangeBalances() {
+        DebitAccount from = new DebitAccount("0000000001", "Ivan", 10050.0);
+        DebitAccount to = new DebitAccount("0000000002", "Petr", 0.0);
+        // комиссия 1 процент, нужно 10 100, а есть только 10 050
+        TransferService service = new TransferService(new PercentCommission(1.0), notificationService);
+
+        assertThrows(
+                InsufficientFundsException.class,
+                () -> service.transfer(from, to, 10000.0)
+        );
+
+        assertEquals(10050.0, from.getBalance());
+        assertEquals(0.0, to.getBalance());
+    }
+
+    @Test
+    void failedTransferOverLimitDoesNotChangeBalances() {
+        DebitAccount from = new DebitAccount("0000000001", "Ivan", 100000.0);
+        DebitAccount to = new DebitAccount("0000000002", "Petr", 0.0);
+        TransferService service = new TransferService(new NoCommission(), notificationService);
+
+        assertThrows(
+                TransferLimitExceededException.class,
+                () -> service.transfer(from, to, 50001.0)
+        );
+
+        // деньги не списались и не зачислились
         assertEquals(100000.0, from.getBalance());
         assertEquals(0.0, to.getBalance());
     }

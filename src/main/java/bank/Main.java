@@ -82,6 +82,29 @@ public class Main {
         System.out.println("acc2: " + acc2.getBalance());
 
         System.out.println("----------------------");
+        System.out.println("26.09 13 этап: состояние после ошибки");
+        TransferService service2 = new TransferService(
+                new NoCommission(),
+                new ConsoleNotificationService()
+        );
+
+        DebitAccount acc3 = new DebitAccount("0000000006", "Ivan", 1000);
+        DebitAccount acc4 = new DebitAccount("0000000007", "Petr", 2000);
+
+        System.out.println("до ошибки acc3: " + acc3.getBalance());
+        System.out.println("до ошибки acc4: " + acc4.getBalance());
+
+        try {
+            service2.transfer(acc3, acc4, 5000); // денег не хватит
+        } catch (InsufficientFundsException e) {
+            System.out.println("перевод не прошёл: " + e.getMessage());
+        }
+
+        // балансы остались как были, система не сломалась
+        System.out.println("после ошибки acc3: " + acc3.getBalance());
+        System.out.println("после ошибки acc4: " + acc4.getBalance());
+
+        System.out.println("----------------------");
         System.out.println("26.09 1 этап:");
         System.out.println(debit);
 
