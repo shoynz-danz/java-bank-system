@@ -66,10 +66,6 @@ public abstract class BankAccount implements Identifiable<AccountNumber> {
         return owner;
     }
 
-    protected void setBalance(double balance) {
-        this.balance = balance;
-    }
-
     @Override
     public String toString() {
         return getClass().getSimpleName() + "{ number='" + number.value() + "', owner='" + owner + "', balance=" + balance + " }";
