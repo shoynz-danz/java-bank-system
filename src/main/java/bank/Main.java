@@ -131,6 +131,7 @@ public class Main {
         System.out.println("26.09 7 этап: транзакции");
 
         Transaction tx1 = new Transaction(
+                1L,
                 TransactionType.DEPOSIT,
                 new AccountNumber("1234567890"),
                 5000,
@@ -138,6 +139,7 @@ public class Main {
         );
 
         Transaction tx2 = new Transaction(
+                2L,
                 TransactionType.WITHDRAWAL,
                 new AccountNumber("0000000001"),
                 3000,
