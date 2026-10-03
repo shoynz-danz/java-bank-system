@@ -164,6 +164,19 @@ public class Main {
         } catch (ClassCastException e) {
             System.out.println("Сценарий 2: упало с " + e.getMessage());
         }
+
+        // 03.10 GENERICS
+        BoxGeneric<String> text = new BoxGeneric<>();
+        text.set("Java");
+        String str = text.get();
+        System.out.println("Сценарий 3: " + str);
+
+        BoxGeneric<Integer> number = new BoxGeneric<>();
+        number.set(42);
+        Integer fortyTwo = number.get();
+        System.out.println("Сценарий 4: " + fortyTwo);
+
+        // number.set("Java"); // не скомпилируется
     }
 }
 
