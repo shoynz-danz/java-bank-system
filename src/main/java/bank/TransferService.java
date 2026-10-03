@@ -23,7 +23,7 @@ public class TransferService {
             throw new IllegalArgumentException("Accounts must not be null");
         }
 
-        if (from == to) {
+        if (from.equals(to)) {
             throw new IllegalArgumentException("Cannot transfer to the same account");
         }
 

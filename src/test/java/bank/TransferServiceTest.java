@@ -65,6 +65,8 @@ public class TransferServiceTest {
         assertEquals(2000.0, to.getBalance());
     }
 
+    // не проверяет по содержимому
+    // один и тот же объект, тут from == to и from.equals(to) дают true
     @Test
     void transferToSameAccountThrowsException() {
         DebitAccount account = new DebitAccount("0000000001", "Ivan", 5000.0);
@@ -73,6 +75,22 @@ public class TransferServiceTest {
         assertThrows(IllegalArgumentException.class, () -> service.transfer(account, account, 1000.0));
 
         assertEquals(5000.0, account.getBalance());
+    }
+
+    // два разных объекта с одним номером счёта,
+    // from == to тут false, а equals сравнивает по номеру
+    @Test
+    void transferToSameNumberThrowsException() {
+        DebitAccount acc1 = new DebitAccount("0000000001", "Ivan", 5000.0);
+        DebitAccount acc2 = new DebitAccount("0000000001", "Ivan", 2000.0);
+        TransferService service = new TransferService(new NoCommission(), notificationService);
+
+        // номер счёта один и тот же, значит перевод запрещён
+        assertThrows(IllegalArgumentException.class, () -> service.transfer(acc1, acc2, 1000.0));
+
+        // деньги не списались и не зачислились
+        assertEquals(5000.0, acc1.getBalance());
+        assertEquals(2000.0, acc2.getBalance());
     }
 
     @Test
