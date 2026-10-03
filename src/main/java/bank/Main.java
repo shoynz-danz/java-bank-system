@@ -146,6 +146,24 @@ public class Main {
 
         System.out.println(tx1);
         System.out.println(tx2);
+
+        // 03.10 BOX
+        //  воркает
+        Box box1 = new Box();
+        box1.set("Java");
+        String value1 = (String) box1.get();
+        System.out.println("Сценарий 1: " + value1);
+
+        // падает во время выполнения с ClassCastException
+        Box box2 = new Box();
+        box2.set(123); // положили число Integer
+
+        try {
+            String value2 = (String) box2.get(); // тут и падает
+            System.out.println("Сценарий 2: " + value2);
+        } catch (ClassCastException e) {
+            System.out.println("Сценарий 2: упало с " + e.getMessage());
+        }
     }
 }
 
