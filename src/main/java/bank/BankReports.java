@@ -12,6 +12,11 @@ Producer Extends: раз список нам что-то выдаёт, пише�
 метод только кладёт дебетовые счета, поэтому принимает списки
 куда дебетовый точно влезет: List<DebitAccount>, List<BankAccount>, List<Object>.
 Consumer Super: раз список наши значения принимает, пишем super.
+
+03.10 этап 6: универсальный copy, тут оба правила сразу.
+<T> - тип придумывает сам компилятор, когда видит вызов.
+source только отдаёт T, значит producer, пишем ? extends T.
+target только принимает T, значит consumer, пишем ? super T.
  */
 public class BankReports {
 
@@ -33,5 +38,11 @@ public class BankReports {
         // BankAccount first = target.get(0);
         // компилятор гарантирует только Object, потому что настоящий список
         // может оказаться List<Object>, где лежит что угодно
+    }
+
+    public static <T> void copy(List<? extends T> source, List<? super T> target) {
+        for (T item : source) {
+            target.add(item);
+        }
     }
 }

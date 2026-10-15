@@ -70,4 +70,66 @@ public class BankReportsTest {
         Object first = target.get(0);
         assertTrue(first instanceof DebitAccount);
     }
+
+    @Test
+    void copyDebitAccountsToBankAccountList() {
+        // подготовка
+        List<DebitAccount> source = new ArrayList<>();
+        DebitAccount first = new DebitAccount("0000000001", "Ivan", 1000);
+        DebitAccount second = new DebitAccount("0000000002", "Petr", 2000);
+        source.add(first);
+        source.add(second);
+        List<BankAccount> target = new ArrayList<>();
+
+        // действие
+        BankReports.copy(source, target);
+
+        // проверка всё переехало и порядок тот же
+        assertEquals(2, target.size());
+        assertSame(first, target.get(0));
+        assertSame(second, target.get(1));
+    }
+
+    @Test
+    void copyDebitAccountsToObjectList() {
+        List<DebitAccount> source = new ArrayList<>();
+        source.add(new DebitAccount("0000000001", "Ivan", 1000));
+        source.add(new DebitAccount("0000000002", "Petr", 2000));
+        List<Object> target = new ArrayList<>();
+
+        BankReports.copy(source, target);
+
+        assertEquals(2, target.size());
+        assertTrue(target.get(0) instanceof DebitAccount);
+        assertTrue(target.get(1) instanceof DebitAccount);
+    }
+
+    @Test
+    void copyBankAccountsToBankAccountList() {
+        List<BankAccount> source = new ArrayList<>();
+        source.add(new DebitAccount("0000000001", "Ivan", 1000));
+        source.add(new SavingsAccount("0000000002", "Petr", 5000, 1000));
+        List<BankAccount> target = new ArrayList<>();
+
+        BankReports.copy(source, target);
+
+        assertEquals(2, target.size());
+        assertEquals(6000, BankReports.totalBalance(target));
+    }
+
+    @Test
+    void copyKeepsOrder() {
+        // порядок проверяем по номерам счетов
+        List<DebitAccount> source = new ArrayList<>();
+        source.add(new DebitAccount("0000000001", "Ivan", 100));
+        source.add(new DebitAccount("0000000002", "Petr", 200));
+        source.add(new DebitAccount("0000000003", "Anna", 300));
+        List<BankAccount> target = new ArrayList<>();
+
+        BankReports.copy(source, target);
+
+        assertEquals("0000000001", target.get(0).getNumber().value());
+        assertEquals("0000000002", target.get(1).getNumber().value());
+        assertEquals("0000000003", target.get(2).getNumber().value());
+    }
 }
