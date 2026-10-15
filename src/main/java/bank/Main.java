@@ -179,6 +179,13 @@ public class Main {
         System.out.println("Сценарий 4: " + fortyTwo);
 
         // number.set("Java"); // не скомпилируется
+
+        // 03.10 этап 8: стирание типов
+        // на runtime это один и тот же ArrayList, String и Integer стёрлись
+        java.util.List<String> strings = new java.util.ArrayList<>();
+        java.util.List<Integer> numbers = new java.util.ArrayList<>();
+        System.out.println(strings.getClass());
+        System.out.println(numbers.getClass());
+        System.out.println(strings.getClass() == numbers.getClass());
     }
 }
-
