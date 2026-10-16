@@ -45,6 +45,19 @@ public class InMemoryRepositoryTest {
     }
 
     @Test
+    void savingSameIdReplacesOldValue() {
+        // тест из задания: проверяем что вернулся именно новый объект
+        Repository<AccountNumber, BankAccount> repository = new InMemoryRepository<>();
+        AccountNumber id = new AccountNumber("0000000001");
+        BankAccount oldAccount = new DebitAccount(id, "Ivan", 1000);
+        BankAccount newAccount = new DebitAccount(id, "Petr", 5000);
+        repository.save(oldAccount);
+        repository.save(newAccount);
+        assertEquals(1, repository.size());
+        assertSame(newAccount, repository.findById(id));
+    }
+
+    @Test
     void findByIdReturnsNullIfNotFound() {
         Repository<AccountNumber, BankAccount> repo = new InMemoryRepository<>();
 
