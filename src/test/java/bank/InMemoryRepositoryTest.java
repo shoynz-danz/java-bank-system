@@ -1,6 +1,7 @@
 package bank;
 
 import org.junit.jupiter.api.Test;
+import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class InMemoryRepositoryTest {
@@ -44,13 +45,11 @@ public class InMemoryRepositoryTest {
     }
 
     @Test
-    void findByIdThrowsIfNotFound() {
+    void findByIdReturnsNullIfNotFound() {
         Repository<AccountNumber, BankAccount> repo = new InMemoryRepository<>();
 
-        assertThrows(
-                EntityNotFoundException.class,
-                () -> repo.findById(new AccountNumber("0000000009"))
-        );
+        // теперь как у мапы: нет ключа - просто null
+        assertNull(repo.findById(new AccountNumber("0000000009")));
     }
 
     @Test
@@ -58,6 +57,46 @@ public class InMemoryRepositoryTest {
         Repository<AccountNumber, BankAccount> repo = new InMemoryRepository<>();
 
         assertFalse(repo.existsById(new AccountNumber("0000000009")));
+    }
+
+    @Test
+    void deleteByIdRemovesAccount() {
+        // подготовка
+        Repository<AccountNumber, BankAccount> repo = new InMemoryRepository<>();
+        repo.save(new DebitAccount("0000000001", "Иван", 1000));
+
+        // действие
+        boolean removed = repo.deleteById(new AccountNumber("0000000001"));
+
+        // проверка
+        assertTrue(removed);
+        assertEquals(0, repo.size());
+        assertFalse(repo.existsById(new AccountNumber("0000000001")));
+    }
+
+    @Test
+    void deleteByIdReturnsFalseIfNotFound() {
+        Repository<AccountNumber, BankAccount> repo = new InMemoryRepository<>();
+
+        assertFalse(repo.deleteById(new AccountNumber("0000000009")));
+    }
+
+    @Test
+    void findAllReturnsAllSaved() {
+        // подготовка
+        Repository<AccountNumber, BankAccount> repo = new InMemoryRepository<>();
+        BankAccount first = new DebitAccount("0000000001", "Иван", 1000);
+        BankAccount second = new DebitAccount("0000000002", "Петр", 2000);
+        repo.save(first);
+        repo.save(second);
+
+        // действие
+        List<BankAccount> all = repo.findAll();
+
+        // проверка
+        assertEquals(2, all.size());
+        assertTrue(all.contains(first));
+        assertTrue(all.contains(second));
     }
 
     @Test
