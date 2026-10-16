@@ -277,4 +277,23 @@ public class TransferServiceTest {
         assertEquals(0, fakeNotifier.getNotificationCount());
         assertNull(fakeNotifier.getLastMessage());
     }
+
+    @Test
+    void transferFromBlockedAccountThrowsException() {
+        // подготовка реестр с заблокированным отправителем
+        DebitAccount from = new DebitAccount("0000000001", "Ivan", 5000.0);
+        DebitAccount to = new DebitAccount("0000000002", "Petr", 2000.0);
+        BlockedAccountRegistry blocked = new BlockedAccountRegistry();
+        blocked.block(from.getNumber());
+        FakeNotificationService fakeNotifier = new FakeNotificationService();
+        TransferService service = new TransferService(new NoCommission(), fakeNotifier, blocked);
+
+        // действие
+        assertThrows(IllegalStateException.class, () -> service.transfer(from, to, 1000.0));
+
+        // проверка деньги не ушли и уведомление не отправилось
+        assertEquals(5000.0, from.getBalance());
+        assertEquals(2000.0, to.getBalance());
+        assertEquals(0, fakeNotifier.getNotificationCount());
+    }
 }

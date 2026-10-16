@@ -7,10 +7,22 @@ public class TransferService {
 
     private final CommissionPolicy commissionPolicy;
     private final NotificationService notificationService;
+    private final BlockedAccountRegistry blockedAccounts;
 
     public TransferService(CommissionPolicy commissionPolicy, NotificationService notificationService) {
         this.commissionPolicy = commissionPolicy;
         this.notificationService = notificationService;
+        // старый конструктор оставляем, просто реестр пустой
+        this.blockedAccounts = new BlockedAccountRegistry();
+    }
+
+    public TransferService(
+            CommissionPolicy commissionPolicy,
+            NotificationService notificationService,
+            BlockedAccountRegistry blockedAccounts) {
+        this.commissionPolicy = commissionPolicy;
+        this.notificationService = notificationService;
+        this.blockedAccounts = blockedAccounts;
     }
 
     public void transfer(BankAccount from, BankAccount to, double amount) {
@@ -25,6 +37,11 @@ public class TransferService {
 
         if (from.equals(to)) {
             throw new IllegalArgumentException("Cannot transfer to the same account");
+        }
+
+        // с заблокированного счёта переводить нельзя
+        if (blockedAccounts.isBlocked(from.getNumber())) {
+            throw new IllegalStateException("Source account is blocked");
         }
 
         if (amount > TRANSFER_LIMIT) {
