@@ -296,4 +296,39 @@ public class TransferServiceTest {
         assertEquals(2000.0, to.getBalance());
         assertEquals(0, fakeNotifier.getNotificationCount());
     }
+
+    @Test
+    void successfulTransferWritesToJournal() {
+        // подготовка
+        DebitAccount from = new DebitAccount("0000000001", "Ivan", 5000.0);
+        DebitAccount to = new DebitAccount("0000000002", "Petr", 2000.0);
+        TransactionJournal journal = new TransactionJournal();
+        TransferService service = new TransferService(
+                new NoCommission(), notificationService, new BlockedAccountRegistry(), journal);
+
+        // действие
+        service.transfer(from, to, 1000.0);
+
+        // проверка в журнале одна запись про этот перевод
+        assertEquals(1, journal.size());
+        Transaction tx = journal.findAll().get(0);
+        assertEquals(TransactionType.TRANSFER, tx.type());
+        assertEquals(new AccountNumber("0000000001"), tx.account());
+        assertEquals(1000.0, tx.amount());
+        assertEquals(TransactionStatus.SUCCESS, tx.status());
+    }
+
+    @Test
+    void failedTransferDoesNotWriteToJournal() {
+        // денег не хватит, значит и в журнал ничего не попадёт
+        DebitAccount from = new DebitAccount("0000000001", "Ivan", 1000.0);
+        DebitAccount to = new DebitAccount("0000000002", "Petr", 2000.0);
+        TransactionJournal journal = new TransactionJournal();
+        TransferService service = new TransferService(
+                new NoCommission(), notificationService, new BlockedAccountRegistry(), journal);
+
+        assertThrows(InsufficientFundsException.class, () -> service.transfer(from, to, 5000.0));
+
+        assertEquals(0, journal.size());
+    }
 }

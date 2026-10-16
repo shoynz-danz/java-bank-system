@@ -8,12 +8,15 @@ public class TransferService {
     private final CommissionPolicy commissionPolicy;
     private final NotificationService notificationService;
     private final BlockedAccountRegistry blockedAccounts;
+    // журнал может быть null, тогда просто не пишем
+    private final TransactionJournal journal;
 
     public TransferService(CommissionPolicy commissionPolicy, NotificationService notificationService) {
         this.commissionPolicy = commissionPolicy;
         this.notificationService = notificationService;
         // старый конструктор оставляем, просто реестр пустой
         this.blockedAccounts = new BlockedAccountRegistry();
+        this.journal = null;
     }
 
     public TransferService(
@@ -23,6 +26,18 @@ public class TransferService {
         this.commissionPolicy = commissionPolicy;
         this.notificationService = notificationService;
         this.blockedAccounts = blockedAccounts;
+        this.journal = null;
+    }
+
+    public TransferService(
+            CommissionPolicy commissionPolicy,
+            NotificationService notificationService,
+            BlockedAccountRegistry blockedAccounts,
+            TransactionJournal journal) {
+        this.commissionPolicy = commissionPolicy;
+        this.notificationService = notificationService;
+        this.blockedAccounts = blockedAccounts;
+        this.journal = journal;
     }
 
     public void transfer(BankAccount from, BankAccount to, double amount) {
@@ -56,6 +71,17 @@ public class TransferService {
 
         // деньги зачисляем только после успешного списания
         to.deposit(amount);
+
+        // пишем в журнал только если перевод реально прошёл
+        if (journal != null) {
+            journal.add(new Transaction(
+                    null,
+                    TransactionType.TRANSFER,
+                    from.getNumber(),
+                    amount,
+                    TransactionStatus.SUCCESS
+            ));
+        }
 
         notificationService.notify("Transfer " + amount + " completed");
     }
