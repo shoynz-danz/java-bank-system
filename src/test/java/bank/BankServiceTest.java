@@ -13,6 +13,7 @@ public class BankServiceTest {
 
     @Test
     void openThenFind() {
+        // открыли, потом нашли тот же счёт
         BankService service = service();
         BankAccount account = new DebitAccount("0000000001", "Ivan", 1000);
 
@@ -23,6 +24,7 @@ public class BankServiceTest {
 
     @Test
     void saveSameIdTwiceReplaces() {
+        // тот же id второй раз — старый заменяется
         BankService service = service();
         service.openAccount(new DebitAccount("0000000001", "Ivan", 1000));
 
@@ -35,6 +37,7 @@ public class BankServiceTest {
 
     @Test
     void closeDeletesAccount() {
+        // закрыли — счёт больше не находится
         BankService service = service();
         AccountNumber number = new AccountNumber("0000000001");
         service.openAccount(new DebitAccount("0000000001", "Ivan", 1000));
@@ -43,5 +46,78 @@ public class BankServiceTest {
 
         assertTrue(closed);
         assertNull(service.findAccount(number));
+    }
+
+    @Test
+    void transferByNumbersOk() {
+        // перевод по номерам, оба баланса поменялись
+        BankService service = service();
+        service.openAccount(new DebitAccount("0000000001", "Ivan", 10000));
+        service.openAccount(new DebitAccount("0000000002", "Petr", 2000));
+        AccountNumber from = new AccountNumber("0000000001");
+        AccountNumber to = new AccountNumber("0000000002");
+
+        service.transfer(from, to, 3000);
+
+        assertEquals(7000, service.findAccount(from).getBalance());
+        assertEquals(5000, service.findAccount(to).getBalance());
+    }
+
+    @Test
+    void transferMissingFrom() {
+        // отправителя нет — получатель не тронут
+        BankService service = service();
+        service.openAccount(new DebitAccount("0000000002", "Petr", 2000));
+
+        assertThrows(EntityNotFoundException.class, () -> service.transfer(
+                new AccountNumber("0000000001"), new AccountNumber("0000000002"), 100));
+
+        assertEquals(2000, service.findAccount(new AccountNumber("0000000002")).getBalance());
+    }
+
+    @Test
+    void transferMissingTo() {
+        // получателя нет — с отправителя ничего не списалось
+        BankService service = service();
+        service.openAccount(new DebitAccount("0000000001", "Ivan", 10000));
+
+        assertThrows(EntityNotFoundException.class, () -> service.transfer(
+                new AccountNumber("0000000001"), new AccountNumber("0000000002"), 100));
+
+        assertEquals(10000, service.findAccount(new AccountNumber("0000000001")).getBalance());
+    }
+
+    @Test
+    void transferFromBlocked() {
+        // отправитель в блок-листе — деньги на месте
+        Repository<AccountNumber, BankAccount> repo = new InMemoryRepository<>();
+        BlockedAccountRegistry blocked = new BlockedAccountRegistry();
+        blocked.block(new AccountNumber("0000000001"));
+        FakeNotificationService fake = new FakeNotificationService();
+        BankService service = new BankService(
+                repo, new TransferService(new NoCommission(), fake, blocked));
+
+        service.openAccount(new DebitAccount("0000000001", "Ivan", 10000));
+        service.openAccount(new DebitAccount("0000000002", "Petr", 2000));
+
+        assertThrows(IllegalStateException.class, () -> service.transfer(
+                new AccountNumber("0000000001"), new AccountNumber("0000000002"), 1000));
+
+        assertEquals(10000, service.findAccount(new AccountNumber("0000000001")).getBalance());
+        assertEquals(2000, service.findAccount(new AccountNumber("0000000002")).getBalance());
+    }
+
+    @Test
+    void transferNoMoney() {
+        // денег не хватает — ни один баланс не поменялся
+        BankService service = service();
+        service.openAccount(new DebitAccount("0000000001", "Ivan", 1000));
+        service.openAccount(new DebitAccount("0000000002", "Petr", 2000));
+
+        assertThrows(InsufficientFundsException.class, () -> service.transfer(
+                new AccountNumber("0000000001"), new AccountNumber("0000000002"), 5000));
+
+        assertEquals(1000, service.findAccount(new AccountNumber("0000000001")).getBalance());
+        assertEquals(2000, service.findAccount(new AccountNumber("0000000002")).getBalance());
     }
 }

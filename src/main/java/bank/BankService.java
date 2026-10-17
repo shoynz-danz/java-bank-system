@@ -36,4 +36,17 @@ public class BankService {
     public boolean closeAccount(AccountNumber number) {
         return accounts.deleteById(number);
     }
+
+    // 17.10 этап 2: перевод по номерам, сами счета достаём внутри
+    public void transfer(AccountNumber fromNumber, AccountNumber toNumber, double amount) {
+        BankAccount from = accounts.findById(fromNumber);
+        if (from == null) {
+            throw new EntityNotFoundException("счёт не найден");
+        }
+        BankAccount to = accounts.findById(toNumber);
+        if (to == null) {
+            throw new EntityNotFoundException("счёт не найден");
+        }
+        transferService.transfer(from, to, amount);
+    }
 }
