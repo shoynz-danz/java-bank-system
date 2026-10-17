@@ -46,13 +46,52 @@ public class TransactionJournalTest {
         assertEquals(2, journal.size());
     }
 
+   @Test
+   void returnedListDoesNotExposeInternalState() {
+       // тест из задания
+       TransactionJournal journal = new TransactionJournal();
+       journal.add(tx(1L, "0000000001"));
+       List<Transaction> copy = journal.findAll();
+       copy.clear();
+       assertEquals(1, journal.size());
+   }
+
     @Test
-    void returnedListDoesNotExposeInternalState() {
-        // тест из задания
+    void removeRejectedDeletesOnlyRejected() {
+        // подготовка
         TransactionJournal journal = new TransactionJournal();
-        journal.add(tx(1L, "0000000001"));
-        List<Transaction> copy = journal.findAll();
-        copy.clear();
-        assertEquals(1, journal.size());
+        Transaction ok1 = new Transaction(1L, TransactionType.TRANSFER, new AccountNumber("0000000001"), 1000, TransactionStatus.SUCCESS);
+        Transaction bad = new Transaction(2L, TransactionType.WITHDRAWAL, new AccountNumber("0000000002"), 500, TransactionStatus.REJECTED);
+        Transaction ok2 = new Transaction(3L, TransactionType.TRANSFER, new AccountNumber("0000000003"), 2000, TransactionStatus.SUCCESS);
+        journal.add(ok1);
+        journal.add(bad);
+        journal.add(ok2);
+
+        // действие
+        journal.removeRejected();
+
+        // проверка: остались только успешные, в том же порядке
+        assertEquals(2, journal.size());
+        List<Transaction> all = journal.findAll();
+        assertSame(ok1, all.get(0));
+        assertSame(ok2, all.get(1));
+    }
+
+    @Test
+    void removeRejectedEmptyJournal() {
+        TransactionJournal journal = new TransactionJournal();
+        journal.removeRejected();
+        assertEquals(0, journal.size());
+    }
+
+    @Test
+    void removeRejectedWhenAllRejected() {
+        TransactionJournal journal = new TransactionJournal();
+        journal.add(new Transaction(1L, TransactionType.TRANSFER, new AccountNumber("0000000001"), 1000, TransactionStatus.REJECTED));
+        journal.add(new Transaction(2L, TransactionType.TRANSFER, new AccountNumber("0000000002"), 2000, TransactionStatus.REJECTED));
+
+        journal.removeRejected();
+
+        assertEquals(0, journal.size());
     }
 }
