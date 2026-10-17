@@ -94,4 +94,33 @@ public class TransactionJournalTest {
 
         assertEquals(0, journal.size());
     }
+
+    @Test
+    void findByAccountReturnsOnlyMatching() {
+        // лежат чужие и свои, вернулись только свои
+        TransactionJournal journal = new TransactionJournal();
+        Transaction first = tx(1L, "0000000001");
+        Transaction other = tx(2L, "0000000002");
+        Transaction second = tx(3L, "0000000001");
+        journal.add(first);
+        journal.add(other);
+        journal.add(second);
+
+        List<Transaction> found = journal.findByAccount(new AccountNumber("0000000001"));
+
+        assertEquals(2, found.size());
+        assertSame(first, found.get(0));
+        assertSame(second, found.get(1));
+    }
+
+    @Test
+    void findByAccountEmptyWhenNoMatch() {
+        // такого счёта в журнале нет — пустой список
+        TransactionJournal journal = new TransactionJournal();
+        journal.add(tx(1L, "0000000001"));
+
+        List<Transaction> found = journal.findByAccount(new AccountNumber("0000000002"));
+
+        assertTrue(found.isEmpty());
+    }
 }

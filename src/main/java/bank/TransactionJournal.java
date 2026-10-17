@@ -39,4 +39,15 @@ public class TransactionJournal {
             }
         }
     }
+
+    // 17.10 этап 3: поиск по счёту линейным проходом
+    public List<Transaction> findByAccount(AccountNumber number) {
+        List<Transaction> result = new ArrayList<>();
+        for (Transaction tx : transactions) {
+            if (tx.account().equals(number)) {
+                result.add(tx);
+            }
+        }
+        return result;
+    }
 }
