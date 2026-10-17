@@ -7,6 +7,10 @@ import java.util.List;
 /*
 10.10 этап 3: журнал транзакций.
 тут важен порядок и повторы разрешены, поэтому List, а не Set.
+
+10.10 этап 5: удаление через Iterator.
+в for-each удалять нельзя — будет ConcurrentModificationException,
+поэтому идём через iterator и удаляем через iterator.remove().
  */
 public class TransactionJournal {
 
