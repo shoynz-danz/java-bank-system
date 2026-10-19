@@ -3,6 +3,7 @@ package bank;
 import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BankReportsTest {
@@ -131,5 +132,75 @@ public class BankReportsTest {
         assertEquals("0000000001", target.get(0).getNumber().value());
         assertEquals("0000000002", target.get(1).getNumber().value());
         assertEquals("0000000003", target.get(2).getNumber().value());
+    }
+
+    private Transaction tx(long id, String number, double amount) {
+        // помощник чтобы не писать одно и то же
+        return new Transaction(
+                id,
+                TransactionType.TRANSFER,
+                new AccountNumber(number),
+                amount,
+                TransactionStatus.SUCCESS
+        );
+    }
+
+    @Test
+    void countByAccountEmpty() {
+        // пустой список — пустая мапа
+        assertTrue(BankReports.countByAccount(new ArrayList<>()).isEmpty());
+    }
+
+    @Test
+    void countByAccountSingle() {
+        List<Transaction> transactions = new ArrayList<>();
+        transactions.add(tx(1L, "0000000001", 1000));
+
+        Map<AccountNumber, Integer> result = BankReports.countByAccount(transactions);
+
+        assertEquals(1, result.size());
+        assertEquals(1, result.get(new AccountNumber("0000000001")));
+    }
+
+    @Test
+    void countByAccountMultiple() {
+        // два счёта, у первого две операции
+        List<Transaction> transactions = new ArrayList<>();
+        transactions.add(tx(1L, "0000000001", 1000));
+        transactions.add(tx(2L, "0000000002", 500));
+        transactions.add(tx(3L, "0000000001", 2000));
+
+        Map<AccountNumber, Integer> result = BankReports.countByAccount(transactions);
+
+        assertEquals(2, result.size());
+        assertEquals(2, result.get(new AccountNumber("0000000001")));
+        assertEquals(1, result.get(new AccountNumber("0000000002")));
+    }
+
+    @Test
+    void countByAccountSameValueDifferentObjects() {
+        // разные объекты AccountNumber, но value одинаковый — одна запись
+        List<Transaction> transactions = new ArrayList<>();
+        transactions.add(tx(1L, "0000000001", 1000));
+        transactions.add(tx(2L, "0000000001", 2000));
+
+        Map<AccountNumber, Integer> result = BankReports.countByAccount(transactions);
+
+        assertEquals(1, result.size());
+        assertEquals(2, result.get(new AccountNumber("0000000001")));
+    }
+
+    @Test
+    void totalAmountByAccount() {
+        List<Transaction> transactions = new ArrayList<>();
+        transactions.add(tx(1L, "0000000001", 1000));
+        transactions.add(tx(2L, "0000000002", 500));
+        transactions.add(tx(3L, "0000000001", 2000));
+
+        Map<AccountNumber, Double> result = BankReports.totalAmountByAccount(transactions);
+
+        assertEquals(2, result.size());
+        assertEquals(3000.0, result.get(new AccountNumber("0000000001")));
+        assertEquals(500.0, result.get(new AccountNumber("0000000002")));
     }
 }
