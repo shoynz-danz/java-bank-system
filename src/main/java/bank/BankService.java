@@ -1,5 +1,8 @@
 package bank;
 
+import java.util.List;
+import java.util.function.Predicate;
+
 /*
 17.10 этап 1: сервис владеет счетами.
 клиент ходит сюда, а не в Repository напрямую.
@@ -48,5 +51,11 @@ public class BankService {
             throw new EntityNotFoundException("счёт не найден");
         }
         transferService.transfer(from, to, amount);
+    }
+
+    // 24.10 этап 3: ищем счета по условию, не показываем внутреннее хранилище
+    public List<BankAccount> findAccounts(Predicate<? super BankAccount> condition) {
+        List<BankAccount> all = accounts.findAll();
+        return CollectionFunctions.filter(all, condition);
     }
 }
