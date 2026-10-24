@@ -234,5 +234,41 @@ public class Main {
         for (BankAccount acc : accounts) {
             System.out.println(acc);
         }
+
+        // 24.10 этап 2: лямбды вместо классов
+        System.out.println("----------------------");
+        System.out.println("24.10 2 этап: функциональные интерфейсы и лямбды");
+
+        // перевод без комиссии (лямбда)
+        CommissionPolicy noCommission = amount -> 0.0;
+
+        // перевод с 1% комиссии (лямбда)
+        CommissionPolicy onePercent = amount -> amount * 0.01;
+
+        // уведомление через лямбду
+        NotificationService console = message -> System.out.println(message);
+
+        // уведомление через method reference
+        NotificationService consoleRef = System.out::println;
+
+        TransferService serviceFree = new TransferService(noCommission, console);
+        TransferService servicePercent = new TransferService(onePercent, consoleRef);
+
+        DebitAccount from1 = new DebitAccount("0000000006", "Ivan", 10000);
+        DebitAccount to1 = new DebitAccount("0000000007", "Petr", 1000);
+
+        try {
+            serviceFree.transfer(from1, to1, 1000); // без комиссии
+            System.out.println("без комиссии: " + from1.getBalance() + " / " + to1.getBalance());
+        } catch (RuntimeException e) {
+            System.out.println("без комиссии не прошёл: " + e.getMessage());
+        }
+
+        try {
+            servicePercent.transfer(from1, to1, 1000); // с 1% комиссией
+            System.out.println("с комиссией: " + from1.getBalance() + " / " + to1.getBalance());
+        } catch (RuntimeException e) {
+            System.out.println("с комиссией не прошёл: " + e.getMessage());
+        }
     }
 }
