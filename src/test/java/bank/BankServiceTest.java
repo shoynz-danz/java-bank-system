@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 public class BankServiceTest {
 
@@ -121,5 +122,115 @@ public class BankServiceTest {
 
         assertEquals(1000, service.findAccount(new AccountNumber("0000000001")).getBalance());
         assertEquals(2000, service.findAccount(new AccountNumber("0000000002")).getBalance());
+    }
+
+    @Test
+    void findAccountsRich() {
+        // счета с балансом не меньше 100_000
+        BankService service = service();
+        service.openAccount(new DebitAccount("0000000001", "Ivan", 1000));
+        service.openAccount(new DebitAccount("0000000002", "Petr", 150_000));
+        service.openAccount(new DebitAccount("0000000003", "Anna", 99_999));
+
+        Predicate<BankAccount> rich = a -> a.getBalance() >= 100_000;
+
+        List<BankAccount> result = service.findAccounts(rich);
+
+        assertEquals(1, result.size());
+        assertSame(service.findAccount(new AccountNumber("0000000002")), result.get(0));
+    }
+
+    @Test
+    void findAccountsNotBlocked() {
+        // незаблокированные счета
+        Repository<AccountNumber, BankAccount> repo = new InMemoryRepository<>();
+        BlockedAccountRegistry blocked = new BlockedAccountRegistry();
+        blocked.block(new AccountNumber("0000000001"));
+        FakeNotificationService fake = new FakeNotificationService();
+        BankService service = new BankService(
+                repo, new TransferService(new NoCommission(), fake, blocked));
+
+        service.openAccount(new DebitAccount("0000000001", "Ivan", 1000));
+        service.openAccount(new DebitAccount("0000000002", "Petr", 2000));
+        service.openAccount(new DebitAccount("0000000003", "Anna", 3000));
+
+        Predicate<BankAccount> notBlocked = a -> !blocked.isBlocked(a.getId());
+
+        List<BankAccount> result = service.findAccounts(notBlocked);
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void findAccountsDebitOnly() {
+        // только DebitAccount
+        BankService service = service();
+        service.openAccount(new DebitAccount("0000000001", "Ivan", 1000));
+        service.openAccount(new CreditAccount("0000000002", "Petr", 1000, 5000));
+        service.openAccount(new DebitAccount("0000000003", "Anna", 3000));
+
+        Predicate<BankAccount> debit = DebitAccount.class::isInstance;
+
+        List<BankAccount> result = service.findAccounts(debit);
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void findAccountsRichAndNotBlocked() {
+        // богатые И незаблокированные
+        Repository<AccountNumber, BankAccount> repo = new InMemoryRepository<>();
+        BlockedAccountRegistry blocked = new BlockedAccountRegistry();
+        blocked.block(new AccountNumber("0000000002"));
+        FakeNotificationService fake = new FakeNotificationService();
+        BankService service = new BankService(
+                repo, new TransferService(new NoCommission(), fake, blocked));
+
+        service.openAccount(new DebitAccount("0000000001", "Ivan", 150_000));
+        service.openAccount(new DebitAccount("0000000002", "Petr", 200_000));
+        service.openAccount(new DebitAccount("0000000003", "Anna", 50_000));
+
+        Predicate<BankAccount> rich = a -> a.getBalance() >= 100_000;
+        Predicate<BankAccount> notBlocked = a -> !blocked.isBlocked(a.getId());
+        Predicate<BankAccount> candidates = rich.and(notBlocked);
+
+        List<BankAccount> result = service.findAccounts(candidates);
+
+        assertEquals(1, result.size());
+        assertSame(service.findAccount(new AccountNumber("0000000001")), result.get(0));
+    }
+
+    @Test
+    void findAccountsNotDebit() {
+        // не DebitAccount (debit.negate())
+        BankService service = service();
+        service.openAccount(new DebitAccount("0000000001", "Ivan", 1000));
+        service.openAccount(new CreditAccount("0000000002", "Petr", 1000, 5000));
+        service.openAccount(new DebitAccount("0000000003", "Anna", 3000));
+
+        Predicate<BankAccount> debit = DebitAccount.class::isInstance;
+        Predicate<BankAccount> notDebit = debit.negate();
+
+        List<BankAccount> result = service.findAccounts(notDebit);
+
+        assertEquals(1, result.size());
+        assertSame(service.findAccount(new AccountNumber("0000000002")), result.get(0));
+    }
+
+    @Test
+    void findAccountsRichOrCredit() {
+        // богатые ИЛИ CreditAccount
+        BankService service = service();
+        service.openAccount(new DebitAccount("0000000001", "Ivan", 150_000));
+        service.openAccount(new DebitAccount("0000000002", "Petr", 500));
+        service.openAccount(new CreditAccount("0000000003", "Anna", 0, 5000));
+
+        Predicate<BankAccount> rich = a -> a.getBalance() >= 100_000;
+        Predicate<BankAccount> credit = CreditAccount.class::isInstance;
+        Predicate<BankAccount> candidates = rich.or(credit);
+
+        List<BankAccount> result = service.findAccounts(candidates);
+
+        assertEquals(2, result.size());
     }
 }
