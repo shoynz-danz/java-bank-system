@@ -1,5 +1,9 @@
 package bank;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 public class Main {
     public static void main(String[] args) {
         // дебетовый и накопительный
@@ -187,5 +191,48 @@ public class Main {
         System.out.println(strings.getClass());
         System.out.println(numbers.getClass());
         System.out.println(strings.getClass() == numbers.getClass());
+
+        // 24.10 этап 1: от анонимного класса к lambda
+        System.out.println("----------------------");
+        System.out.println("24.10 1 этап: сортировка счетов по балансу");
+
+        List<BankAccount> accounts = new ArrayList<>();
+        accounts.add(new DebitAccount("0000000001", "Ivan", 1000));
+        accounts.add(new DebitAccount("0000000002", "Petr", 5000));
+        accounts.add(new DebitAccount("0000000003", "Anna", 3000));
+
+        // анонимный класс
+        Comparator<BankAccount> byBalance = new Comparator<BankAccount>() {
+            @Override
+            public int compare(BankAccount a, BankAccount b) {
+                return Double.compare(a.getBalance(), b.getBalance());
+            }
+        };
+
+        // lambda
+        Comparator<BankAccount> byBalanceLambda =
+                (x, y) -> Double.compare(x.getBalance(), y.getBalance());
+
+        // фабричный метод Comparator
+        Comparator<BankAccount> byBalanceMethodRef =
+                Comparator.comparingDouble(BankAccount::getBalance);
+
+        accounts.sort(byBalance);
+        System.out.println("от анонимного класса:");
+        for (BankAccount acc : accounts) {
+            System.out.println(acc);
+        }
+
+        accounts.sort(byBalanceLambda);
+        System.out.println("от lambda:");
+        for (BankAccount acc : accounts) {
+            System.out.println(acc);
+        }
+
+        accounts.sort(byBalanceMethodRef);
+        System.out.println("от Comparator.comparingDouble:");
+        for (BankAccount acc : accounts) {
+            System.out.println(acc);
+        }
     }
 }
