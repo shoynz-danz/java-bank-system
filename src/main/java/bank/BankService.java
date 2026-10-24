@@ -1,5 +1,7 @@
 package bank;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -57,5 +59,12 @@ public class BankService {
     public List<BankAccount> findAccounts(Predicate<? super BankAccount> condition) {
         List<BankAccount> all = accounts.findAll();
         return CollectionFunctions.filter(all, condition);
+    }
+
+    // 24.10 этап 5: сортировка счетов через переданный компаратор
+    public List<BankAccount> sortedAccounts(Comparator<? super BankAccount> comparator) {
+        List<BankAccount> result = new ArrayList<>(accounts.findAll());
+        result.sort(comparator);
+        return result;
     }
 }

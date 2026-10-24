@@ -6,6 +6,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.List;
 import java.util.function.Predicate;
 
+import java.util.Comparator;
+
+
 public class BankServiceTest {
 
     private BankService service() {
@@ -232,5 +235,93 @@ public class BankServiceTest {
         List<BankAccount> result = service.findAccounts(candidates);
 
         assertEquals(2, result.size());
+    }
+
+    // 24.10 этап 5: тесты сортировки через Comparator
+
+    @Test
+    void sortedByBalanceAscending() {
+        // по возрастанию баланса
+        BankService service = service();
+        service.openAccount(new DebitAccount("0000000001", "Ivan", 3000));
+        service.openAccount(new DebitAccount("0000000002", "Petr", 1000));
+        service.openAccount(new DebitAccount("0000000003", "Anna", 2000));
+
+        Comparator<BankAccount> byBalance = Comparator.comparingDouble(BankAccount::getBalance);
+        List<BankAccount> sorted = service.sortedAccounts(byBalance);
+
+        assertEquals(1000, sorted.get(0).getBalance());
+        assertEquals(2000, sorted.get(1).getBalance());
+        assertEquals(3000, sorted.get(2).getBalance());
+    }
+
+    @Test
+    void sortedByBalanceDescending() {
+        // по убыванию баланса
+        BankService service = service();
+        service.openAccount(new DebitAccount("0000000001", "Ivan", 3000));
+        service.openAccount(new DebitAccount("0000000002", "Petr", 1000));
+        service.openAccount(new DebitAccount("0000000003", "Anna", 2000));
+
+        Comparator<BankAccount> byBalance = Comparator.comparingDouble(BankAccount::getBalance);
+        Comparator<BankAccount> byBalanceDesc = byBalance.reversed();
+        List<BankAccount> sorted = service.sortedAccounts(byBalanceDesc);
+
+        assertEquals(3000, sorted.get(0).getBalance());
+        assertEquals(2000, sorted.get(1).getBalance());
+        assertEquals(1000, sorted.get(2).getBalance());
+    }
+
+    @Test
+    void sortedByNumber() {
+        // по номеру счёта
+        BankService service = service();
+        service.openAccount(new DebitAccount("0000000003", "Ivan", 1000));
+        service.openAccount(new DebitAccount("0000000001", "Petr", 1000));
+        service.openAccount(new DebitAccount("0000000002", "Anna", 1000));
+
+        Comparator<BankAccount> byNumber = Comparator.comparing(a -> a.getId().value());
+        List<BankAccount> sorted = service.sortedAccounts(byNumber);
+
+        assertEquals("0000000001", sorted.get(0).getNumber().value());
+        assertEquals("0000000002", sorted.get(1).getNumber().value());
+        assertEquals("0000000003", sorted.get(2).getNumber().value());
+    }
+
+    @Test
+    void sortedByTypeThenBalance() {
+        // сначала тип (CreditAccount раньше DebitAccount по алфавиту), потом баланс
+        BankService service = service();
+        BankAccount credit2 = new CreditAccount("0000000001", "Anna", 2000, 5000);
+        BankAccount credit1 = new CreditAccount("0000000002", "Ivan", 1000, 5000);
+        BankAccount debit = new DebitAccount("0000000003", "Petr", 500);
+
+        service.openAccount(credit2);
+        service.openAccount(credit1);
+        service.openAccount(debit);
+
+        Comparator<BankAccount> byTypeThenBalance = Comparator
+                .comparing((BankAccount a) -> a.getClass().getSimpleName())
+                .thenComparingDouble(BankAccount::getBalance);
+
+        List<BankAccount> sorted = service.sortedAccounts(byTypeThenBalance);
+
+        assertSame(credit1, sorted.get(0));
+        assertSame(credit2, sorted.get(1));
+        assertSame(debit, sorted.get(2));
+    }
+
+    @Test
+    void sortedAccountsDoesNotModifyRepository() {
+        // проверка: сортировка отдаёт копию, внутри банка ничего не сломалось
+        BankService service = service();
+        service.openAccount(new DebitAccount("0000000001", "Ivan", 3000));
+        service.openAccount(new DebitAccount("0000000002", "Petr", 1000));
+
+        List<BankAccount> sorted = service.sortedAccounts(Comparator.comparingDouble(BankAccount::getBalance));
+        sorted.clear();
+
+        assertNotNull(service.findAccount(new AccountNumber("0000000001")));
+        assertNotNull(service.findAccount(new AccountNumber("0000000002")));
     }
 }
