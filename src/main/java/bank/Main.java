@@ -3,6 +3,7 @@ package bank;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
 
 public class Main {
     public static void main(String[] args) {
@@ -270,5 +271,31 @@ public class Main {
         } catch (RuntimeException e) {
             System.out.println("с комиссией не прошёл: " + e.getMessage());
         }
+
+
+        // 24.10 этап 6: преобразование через Function и map
+        System.out.println("----------------------");
+        System.out.println("24.10 6 этап: map и record");
+
+        Function<BankAccount, AccountSummary> toSummary =
+                account -> new AccountSummary(
+                        account.getId(),
+                        account.getClass().getSimpleName(),
+                        account.getBalance()
+                );
+
+        List<AccountSummary> summaries = CollectionFunctions.map(accounts, toSummary);
+        for (AccountSummary summary : summaries) {
+            System.out.println(summary.number().value() + " " + summary.type() + " " + summary.balance());
+        }
+
+        Function<BankAccount, String> label =
+                account -> account.getId().value() + " : " + account.getBalance();
+
+        for (BankAccount acc : accounts) {
+            System.out.println(label.apply(acc));
+        }
+
+
     }
 }

@@ -3,6 +3,7 @@ package bank;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.function.Function;
 
 /*
 24.10 этап 3: универсальная фильтрация без Stream API.
@@ -25,4 +26,17 @@ public final class CollectionFunctions {
         }
         return result;
     }
+
+    // 24.10 этап 6: преобразование объектов без Stream API
+    public static <T, R> List<R> map(
+            List<T> source,
+            Function<? super T, ? extends R> mapper) {
+        List<R> result = new ArrayList<>();
+        for (T value : source) {
+            result.add(mapper.apply(value));
+        }
+        return result;
+    }
 }
+
+
