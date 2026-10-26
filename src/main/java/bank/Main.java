@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Consumer;
 
 public class Main {
     public static void main(String[] args) {
@@ -296,6 +297,16 @@ public class Main {
             System.out.println(label.apply(acc));
         }
 
+        // 24.10 этап 7: Consumer и method reference
+        System.out.println("----------------------");
+        System.out.println("24.10 7 этап: forEach и Consumer");
 
+        // 1. через лямбду
+        Consumer<AccountSummary> printer =
+                summary -> System.out.println(summary);
+        CollectionFunctions.forEach(summaries, printer);
+
+        // 2. через method reference
+        CollectionFunctions.forEach(summaries, System.out::println);
     }
 }

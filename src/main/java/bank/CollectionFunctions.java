@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Function;
+import java.util.function.Consumer;
 
 /*
 24.10 этап 3: универсальная фильтрация без Stream API.
@@ -36,6 +37,15 @@ public final class CollectionFunctions {
             result.add(mapper.apply(value));
         }
         return result;
+    }
+
+    // 24.10 этап 7: действие над каждым элементом через Consumer
+    public static <T> void forEach(
+            List<T> source,
+            Consumer<? super T> action) {
+        for (T value : source) {
+            action.accept(value);
+        }
     }
 }
 
