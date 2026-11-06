@@ -67,4 +67,23 @@ public class BankService {
         result.sort(comparator);
         return result;
     }
+
+    // 31.10 этап 2: отбор счетов через Stream API
+    public List<BankAccount> findRichAccounts(double minBalance) {
+        return accounts.findAll().stream()
+                .filter(acc -> acc.getBalance() >= minBalance)
+                .toList();
+    }
+
+    public List<BankAccount> findDebitAccounts() {
+        return accounts.findAll().stream()
+                .filter(DebitAccount.class::isInstance)
+                .toList();
+    }
+
+    public List<BankAccount> findAccountsByOwner(String owner) {
+        return accounts.findAll().stream()
+                .filter(acc -> acc.getOwner().equals(owner))
+                .toList();
+    }
 }

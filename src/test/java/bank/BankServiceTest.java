@@ -324,4 +324,36 @@ public class BankServiceTest {
         assertNotNull(service.findAccount(new AccountNumber("0000000001")));
         assertNotNull(service.findAccount(new AccountNumber("0000000002")));
     }
+
+    // 31.10 этап 2: тесты filter через Stream API
+
+    @Test
+    void findRichAccountsMatches() {
+        BankService service = service();
+        // пустой репозиторий -> пустой список
+        assertTrue(service.findRichAccounts(100_000).isEmpty());
+
+        service.openAccount(new DebitAccount("0000000001", "Ivan", 50_000));
+        service.openAccount(new DebitAccount("0000000002", "Petr", 100_000));
+        service.openAccount(new DebitAccount("0000000003", "Anna", 200_000));
+
+        // 0 совпадений
+        assertEquals(0, service.findRichAccounts(500_000).size());
+        // 1 совпадение
+        assertEquals(1, service.findRichAccounts(150_000).size());
+        // несколько совпадений
+        assertEquals(2, service.findRichAccounts(100_000).size());
+    }
+
+    @Test
+    void findDebitAndByOwnerStream() {
+        BankService service = service();
+        service.openAccount(new DebitAccount("0000000001", "Ivan", 1000));
+        service.openAccount(new CreditAccount("0000000002", "Ivan", 2000, 5000));
+        service.openAccount(new DebitAccount("0000000003", "Petr", 3000));
+
+        assertEquals(2, service.findDebitAccounts().size());
+        assertEquals(2, service.findAccountsByOwner("Ivan").size());
+        assertEquals(0, service.findAccountsByOwner("Unknown").size());
+    }
 }
