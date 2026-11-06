@@ -356,4 +356,20 @@ public class BankServiceTest {
         assertEquals(2, service.findAccountsByOwner("Ivan").size());
         assertEquals(0, service.findAccountsByOwner("Unknown").size());
     }
+
+    // 31.10 этап 3: тест getAccountSummaries
+
+    @Test
+    void getAccountSummariesCorrectlyMapsTypeAndBalance() {
+        BankService service = service();
+        service.openAccount(new DebitAccount("0000000001", "Ivan", 1500));
+
+        List<AccountSummary> summaries = service.getAccountSummaries();
+
+        assertEquals(1, summaries.size());
+        AccountSummary summary = summaries.get(0);
+        assertEquals(new AccountNumber("0000000001"), summary.number());
+        assertEquals("DebitAccount", summary.type());
+        assertEquals(1500, summary.balance());
+    }
 }

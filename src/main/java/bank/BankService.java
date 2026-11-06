@@ -86,4 +86,19 @@ public class BankService {
                 .filter(acc -> acc.getOwner().equals(owner))
                 .toList();
     }
+
+    // 31.10 этап 3: преобразование в AccountSummary через map и method reference
+    public List<AccountSummary> getAccountSummaries() {
+        return accounts.findAll().stream()
+                .map(this::toSummary)
+                .toList();
+    }
+
+    private AccountSummary toSummary(BankAccount account) {
+        return new AccountSummary(
+                account.getId(),
+                account.getClass().getSimpleName(),
+                account.getBalance()
+        );
+    }
 }
