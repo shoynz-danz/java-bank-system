@@ -101,4 +101,35 @@ public class BankService {
                 account.getBalance()
         );
     }
+
+    // 31.10 этап 4: сортировка через stream().sorted()
+    public List<BankAccount> richestFirst() {
+        return accounts.findAll().stream()
+                .sorted(Comparator
+                        .comparingDouble(BankAccount::getBalance)
+                        .reversed())
+                .toList();
+    }
+
+    public List<BankAccount> sortedByNumber() {
+        return accounts.findAll().stream()
+                .sorted(Comparator.comparing(acc -> acc.getId().value()))
+                .toList();
+    }
+
+    public List<BankAccount> sortedByTypeThenBalance() {
+        return accounts.findAll().stream()
+                .sorted(Comparator
+                        .comparing((BankAccount acc) -> acc.getClass().getSimpleName())
+                        .thenComparingDouble(BankAccount::getBalance))
+                .toList();
+    }
+
+    public List<BankAccount> sortedByOwnerThenNumber() {
+        return accounts.findAll().stream()
+                .sorted(Comparator
+                        .comparing(BankAccount::getOwner)
+                        .thenComparing(acc -> acc.getId().value()))
+                .toList();
+    }
 }

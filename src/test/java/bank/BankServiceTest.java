@@ -372,4 +372,55 @@ public class BankServiceTest {
         assertEquals("DebitAccount", summary.type());
         assertEquals(1500, summary.balance());
     }
+
+    // 31.10 этап 4: тесты stream().sorted()
+
+    @Test
+    void richestFirstSortsAndKeepsRepositoryOrderUnchanged() {
+        Repository<AccountNumber, BankAccount> repo = new InMemoryRepository<>();
+        BankService service = new BankService(
+                repo, new TransferService(new NoCommission(), new FakeNotificationService()));
+
+        service.openAccount(new DebitAccount("0000000001", "Ivan", 1000));
+        service.openAccount(new DebitAccount("0000000002", "Petr", 5000));
+        service.openAccount(new DebitAccount("0000000003", "Anna", 3000));
+
+        List<BankAccount> beforeSort = repo.findAll();
+        List<BankAccount> sorted = service.richestFirst();
+
+        assertEquals(5000, sorted.get(0).getBalance());
+        assertEquals(3000, sorted.get(1).getBalance());
+        assertEquals(1000, sorted.get(2).getBalance());
+        // порядок в самом repository не изменился
+        assertEquals(beforeSort, repo.findAll());
+    }
+
+    @Test
+    void streamSortByNumberTypeAndOwner() {
+        BankService service = service();
+        BankAccount a1 = new DebitAccount("0000000003", "Petr", 2000);
+        BankAccount a2 = new CreditAccount("0000000001", "Ivan", 1000, 5000);
+        BankAccount a3 = new DebitAccount("0000000002", "Ivan", 500);
+        service.openAccount(a1);
+        service.openAccount(a2);
+        service.openAccount(a3);
+
+        // по номеру
+        List<BankAccount> byNum = service.sortedByNumber();
+        assertSame(a2, byNum.get(0));
+        assertSame(a3, byNum.get(1));
+        assertSame(a1, byNum.get(2));
+
+        // по типу, затем по балансу
+        List<BankAccount> byType = service.sortedByTypeThenBalance();
+        assertSame(a2, byType.get(0));
+        assertSame(a3, byType.get(1));
+        assertSame(a1, byType.get(2));
+
+        // по владельцу, затем по номеру
+        List<BankAccount> byOwner = service.sortedByOwnerThenNumber();
+        assertSame(a2, byOwner.get(0));
+        assertSame(a3, byOwner.get(1));
+        assertSame(a1, byOwner.get(2));
+    }
 }
