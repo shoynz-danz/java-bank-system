@@ -308,5 +308,30 @@ public class Main {
 
         // 2. через method reference
         CollectionFunctions.forEach(summaries, System.out::println);
+
+        // 31.10 этап 1: цикл и Stream API
+        System.out.println("----------------------");
+        System.out.println("31.10 1 этап: цикл vs Stream API");
+
+        List<BankAccount> streamAccounts = List.of(
+                new DebitAccount("0000000001", "Ivan", 50_000),
+                new DebitAccount("0000000002", "Petr", 100_000),
+                new DebitAccount("0000000003", "Anna", 150_000)
+        );
+
+        // 1. по-старому через цикл
+        List<BankAccount> loopResult = new ArrayList<>();
+        for (BankAccount account : streamAccounts) {
+            if (account.getBalance() >= 100_000) {
+                loopResult.add(account);
+            }
+        }
+        System.out.println("через цикл: " + loopResult.size());
+
+        // 2. через Stream API
+        List<BankAccount> streamResult = streamAccounts.stream()
+                .filter(acc -> a.getBalance() >= 100_000)
+                .toList();
+        System.out.println("через stream: " + streamResult.size());
     }
 }
