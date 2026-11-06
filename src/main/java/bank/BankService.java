@@ -13,18 +13,30 @@ public class BankService {
 
     private final Repository<AccountNumber, BankAccount> accounts;
     private final TransferService transferService;
+    private final BlockedAccountRegistry blockedAccounts;
 
     public BankService(
             Repository<AccountNumber, BankAccount> accounts,
             TransferService transferService) {
+        this(accounts, transferService, new BlockedAccountRegistry());
+    }
+
+    public BankService(
+            Repository<AccountNumber, BankAccount> accounts,
+            TransferService transferService,
+            BlockedAccountRegistry blockedAccounts) {
         if (accounts == null) {
             throw new IllegalArgumentException("счета null");
         }
         if (transferService == null) {
             throw new IllegalArgumentException("переводы null");
         }
+        if (blockedAccounts == null) {
+            throw new IllegalArgumentException("блокировки null");
+        }
         this.accounts = accounts;
         this.transferService = transferService;
+        this.blockedAccounts = blockedAccounts;
     }
 
     public void openAccount(BankAccount account) {
@@ -131,5 +143,21 @@ public class BankService {
                         .comparing(BankAccount::getOwner)
                         .thenComparing(acc -> acc.getId().value()))
                 .toList();
+    }
+
+    // 31.10 этап 5: short-circuit операции
+    public boolean hasBlockedAccounts() {
+        return accounts.findAll().stream()
+                .anyMatch(acc -> blockedAccounts.isBlocked(acc.getId()));
+    }
+
+    public boolean allAccountsPositive() {
+        return accounts.findAll().stream()
+                .allMatch(acc -> acc.getBalance() > 0);
+    }
+
+    public boolean noCreditAccounts() {
+        return accounts.findAll().stream()
+                .noneMatch(CreditAccount.class::isInstance);
     }
 }

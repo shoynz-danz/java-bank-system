@@ -423,4 +423,49 @@ public class BankServiceTest {
         assertSame(a3, byOwner.get(1));
         assertSame(a1, byOwner.get(2));
     }
+
+    // 31.10 этап 5: тесты anyMatch, allMatch, noneMatch и short-circuit эксперимент
+
+    @Test
+    void matchOperationsTrueAndFalse() {
+        Repository<AccountNumber, BankAccount> repo = new InMemoryRepository<>();
+        BlockedAccountRegistry blocked = new BlockedAccountRegistry();
+        TransferService transfers = new TransferService(new NoCommission(), new FakeNotificationService(), blocked);
+        BankService service = new BankService(repo, transfers, blocked);
+
+        service.openAccount(new DebitAccount("0000000001", "Ivan", 1000));
+        service.openAccount(new DebitAccount("0000000002", "Petr", 2000));
+
+        assertFalse(service.hasBlockedAccounts());
+        assertTrue(service.allAccountsPositive());
+        assertTrue(service.noCreditAccounts());
+
+        // блокируем первый счёт, добавляем счёт с 0 и кредитку
+        blocked.block(new AccountNumber("0000000001"));
+        service.openAccount(new DebitAccount("0000000003", "Anna", 0));
+        service.openAccount(new CreditAccount("0000000004", "Oleg", 500, 5000));
+
+        assertTrue(service.hasBlockedAccounts());
+        assertFalse(service.allAccountsPositive());
+        assertFalse(service.noCreditAccounts());
+    }
+
+    @Test
+    void anyMatchShortCircuitExperiment() {
+        // 3 счёта, но подходящий уже на 2-м месте -> 3-й проверяться не должен
+        List<BankAccount> list = List.of(
+                new DebitAccount("0000000001", "Ivan", 1000),
+                new DebitAccount("0000000002", "Petr", 200_000),
+                new DebitAccount("0000000003", "Anna", 300_000)
+        );
+        int[] calls = {0};
+
+        boolean found = list.stream().anyMatch(acc -> {
+            calls[0]++;
+            return acc.getBalance() >= 100_000;
+        });
+
+        assertTrue(found);
+        assertEquals(2, calls[0]);
+    }
 }
