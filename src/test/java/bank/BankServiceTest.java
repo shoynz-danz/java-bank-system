@@ -575,4 +575,23 @@ public class BankServiceTest {
         assertEquals(8990, accountService.find(from).orElseThrow().getBalance());
         assertEquals(3000, accountService.find(to).orElseThrow().getBalance());
     }
+
+    // 07.11 этап 7: тест паттерна Decorator (цепочка вызовов)
+    @Test
+    void notificationDecoratorsChain() {
+        // Собираем матрёшку: Консоль заворачиваем в Префикс, Префикс в Счётчик, Счётчик в Логгер.
+        ConsoleNotificationAdapter console = new ConsoleNotificationAdapter();
+        PrefixNotificationDecorator prefixed = new PrefixNotificationDecorator(console, "ВНИМАНИЕ: ");
+        CountingNotificationDecorator counter = new CountingNotificationDecorator(prefixed);
+        LoggingNotificationDecorator logger = new LoggingNotificationDecorator(counter);
+
+        // Итоговый сервис, который мы передадим в банк
+        NotificationService notification = logger;
+
+        notification.notify("Перевод выполнен");
+        notification.notify("Счёт закрыт");
+
+        // Проверяем, что счётчик реально насчитал 2 вызова, проходя через всю цепочку
+        assertEquals(2, counter.getCount());
+    }
 }
