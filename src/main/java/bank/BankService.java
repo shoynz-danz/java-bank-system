@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.Optional;
+import java.util.OptionalDouble;
 
 /*
 17.10 этап 1: сервис владеет счетами.
@@ -167,5 +168,23 @@ public class BankService {
         return accounts.findAll().stream()
                 .filter(acc -> acc.getBalance() >= minBalance)
                 .findFirst();
+    }
+
+    // 31.10 этап 7: числовые stream (sum, average, max)
+    public double totalBalance() {
+        return accounts.findAll().stream()
+                .mapToDouble(BankAccount::getBalance)
+                .sum();
+    }
+
+    public OptionalDouble averageBalance() {
+        return accounts.findAll().stream()
+                .mapToDouble(BankAccount::getBalance)
+                .average();
+    }
+
+    public Optional<BankAccount> richestAccount() {
+        return accounts.findAll().stream()
+                .max(Comparator.comparingDouble(BankAccount::getBalance));
     }
 }

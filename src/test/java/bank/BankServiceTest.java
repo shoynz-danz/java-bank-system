@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.Optional;
 import java.util.Comparator;
+import java.util.OptionalDouble;
 
 
 public class BankServiceTest {
@@ -500,5 +501,45 @@ public class BankServiceTest {
                 .map(acc -> acc.getId().value())
                 .orElse("not found");
         assertEquals("not found", notFoundLabel);
+    }
+
+    // 31.10 этап 7: тесты totalBalance, averageBalance, richestAccount
+
+    @Test
+    void totalBalanceEmptyAndNonEmpty() {
+        BankService service = service();
+        assertEquals(0.0, service.totalBalance());
+
+        service.openAccount(new DebitAccount("0000000001", "Ivan", 1000));
+        service.openAccount(new DebitAccount("0000000002", "Petr", 3000));
+
+        assertEquals(4000.0, service.totalBalance());
+    }
+
+    @Test
+    void averageBalanceEmptyAndNonEmpty() {
+        BankService service = service();
+        assertEquals(OptionalDouble.empty(), service.averageBalance());
+
+        service.openAccount(new DebitAccount("0000000001", "Ivan", 1000));
+        service.openAccount(new DebitAccount("0000000002", "Petr", 3000));
+
+        assertTrue(service.averageBalance().isPresent());
+        assertEquals(2000.0, service.averageBalance().getAsDouble());
+    }
+
+    @Test
+    void richestAccountMaxAndEmpty() {
+        BankService service = service();
+        assertTrue(service.richestAccount().isEmpty());
+
+        BankAccount a1 = new DebitAccount("0000000001", "Ivan", 1000);
+        BankAccount a2 = new DebitAccount("0000000002", "Petr", 5000);
+        service.openAccount(a1);
+        service.openAccount(a2);
+
+        Optional<BankAccount> richest = service.richestAccount();
+        assertTrue(richest.isPresent());
+        assertSame(a2, richest.get());
     }
 }
