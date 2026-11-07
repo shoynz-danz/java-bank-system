@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.Optional;
 
 /*
 17.10 этап 1: сервис владеет счетами.
@@ -159,5 +160,12 @@ public class BankService {
     public boolean noCreditAccounts() {
         return accounts.findAll().stream()
                 .noneMatch(CreditAccount.class::isInstance);
+    }
+
+    // 31.10 этап 6: findFirst и Optional
+    public Optional<BankAccount> findFirstRichAccount(double minBalance) {
+        return accounts.findAll().stream()
+                .filter(acc -> acc.getBalance() >= minBalance)
+                .findFirst();
     }
 }

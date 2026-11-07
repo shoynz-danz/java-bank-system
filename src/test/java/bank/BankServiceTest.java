@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import java.util.function.Predicate;
-
+import java.util.Optional;
 import java.util.Comparator;
 
 
@@ -467,5 +467,38 @@ public class BankServiceTest {
 
         assertTrue(found);
         assertEquals(2, calls[0]);
+    }
+
+    // 31.10 этап 6: тесты findFirstRichAccount и Optional
+
+    @Test
+    void findFirstRichAccountPresentAndEmpty() {
+        BankService bank = service();
+        bank.openAccount(new DebitAccount("0000000001", "Ivan", 50_000));
+        bank.openAccount(new DebitAccount("0000000002", "Petr", 150_000));
+
+        // когда богатый счёт есть
+        BankAccount account = bank.findFirstRichAccount(100_000)
+                .orElseThrow(() -> new IllegalStateException("No rich account"));
+        assertEquals("0000000002", account.getId().value());
+
+        String foundLabel = bank.findFirstRichAccount(100_000)
+                .map(acc -> acc.getId().value())
+                .orElse("not found");
+        assertEquals("0000000002", foundLabel);
+
+        // когда богатого счёта нет (Optional.empty)
+        Optional<BankAccount> emptyResult = bank.findFirstRichAccount(500_000);
+        assertTrue(emptyResult.isEmpty());
+
+        assertThrows(IllegalStateException.class, () ->
+                bank.findFirstRichAccount(500_000)
+                        .orElseThrow(() -> new IllegalStateException("No rich account"))
+        );
+
+        String notFoundLabel = bank.findFirstRichAccount(500_000)
+                .map(acc -> acc.getId().value())
+                .orElse("not found");
+        assertEquals("not found", notFoundLabel);
     }
 }
