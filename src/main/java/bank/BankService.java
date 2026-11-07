@@ -10,6 +10,13 @@ import java.util.OptionalDouble;
 /*
 17.10 этап 1: сервис владеет счетами.
 клиент ходит сюда, а не в Repository напрямую.
+
+07.11 этап 1: архитектурная диагностика (нарушение SRP).
+Причины для изменения BankService сейчас смешаны в одном классе:
+1. управление счетами (openAccount, findAccount, closeAccount);
+2. переводы между счетами (transfer);
+3. отчёты и аналитика (totalBalance, averageBalance, richestAccount, getAccountSummaries);
+4. фильтрация и сортировка (findAccounts, sortedAccounts).
  */
 public class BankService {
 
