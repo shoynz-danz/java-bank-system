@@ -542,4 +542,37 @@ public class BankServiceTest {
         assertTrue(richest.isPresent());
         assertSame(a2, richest.get());
     }
+
+    // 07.11 этап 2: тесты разделённых AccountService и TransferApplicationService
+
+    @Test
+    void accountServiceWorksWithoutTransferService() {
+        Repository<AccountNumber, BankAccount> repo = new InMemoryRepository<>();
+        AccountService accountService = new AccountService(repo);
+        AccountNumber number = new AccountNumber("0000000001");
+
+        accountService.open(new DebitAccount(number, "Ivan", 1000));
+
+        assertTrue(accountService.find(number).isPresent());
+        assertTrue(accountService.close(number));
+        assertTrue(accountService.find(number).isEmpty());
+    }
+
+    @Test
+    void transferApplicationServicePreservesTransferRules() {
+        Repository<AccountNumber, BankAccount> repo = new InMemoryRepository<>();
+        AccountService accountService = new AccountService(repo);
+        TransferApplicationService transferApp = new TransferApplicationService(
+                repo, new TransferService(new PercentCommission(1.0), new FakeNotificationService()));
+
+        AccountNumber from = new AccountNumber("0000000001");
+        AccountNumber to = new AccountNumber("0000000002");
+        accountService.open(new DebitAccount(from, "Ivan", 10000));
+        accountService.open(new DebitAccount(to, "Petr", 2000));
+
+        transferApp.transfer(from, to, 1000);
+
+        assertEquals(8990, accountService.find(from).orElseThrow().getBalance());
+        assertEquals(3000, accountService.find(to).orElseThrow().getBalance());
+    }
 }
