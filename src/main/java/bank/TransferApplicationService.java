@@ -4,6 +4,10 @@ package bank;
 07.11 этап 2: прикладной сервис переводов по номерам счетов (SRP).
 не отвечает за отчёты и аналитику.
  */
+
+// 07.11 этап 4: DIP (Dependency Inversion Principle).
+// Мы уже зависим от абстракций (интерфейсов Repository и TransferService),
+// а не от конкретной базы данных (InMemoryRepository).
 public class TransferApplicationService {
 
     private final Repository<AccountNumber, BankAccount> accounts;
