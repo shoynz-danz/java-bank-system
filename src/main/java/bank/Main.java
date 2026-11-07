@@ -333,5 +333,20 @@ public class Main {
                 .filter(acc -> a.getBalance() >= 100_000)
                 .toList();
         System.out.println("через stream: " + streamResult.size());
+
+        // 31.10 этап 8: свёртка через reduce
+        System.out.println("----------------------");
+        System.out.println("31.10 8 этап: цикл vs reduce");
+
+        double totalLoop = 0;
+        for (BankAccount acc : accounts) {
+            totalLoop += acc.getBalance();
+        }
+        System.out.println("сумма циклом: " + totalLoop);
+
+        double totalReduce = accounts.stream()
+                .map(BankAccount::getBalance)
+                .reduce(0.0, Double::sum);
+        System.out.println("сумма через reduce: " + totalReduce);
     }
 }
