@@ -26,15 +26,11 @@ target только принимает T, значит consumer, пишем ? su
  */
 public class BankReports {
 
+    // 31.10 этап 9: сумма балансов через mapToDouble и sum
     public static double totalBalance(List<? extends BankAccount> accounts) {
-        double total = 0;
-        for (BankAccount account : accounts) {
-            total += account.getBalance();
-        }
-        return total;
-        // а вот так нельзя: accounts.add(new DebitAccount("0000000001", "Ivan", 100));
-        // компилятор не даёт добавлять, потому что настоящий список
-        // может оказаться List<SavingsAccount>, куда дебетовый класть нельзя
+        return accounts.stream()
+                .mapToDouble(BankAccount::getBalance)
+                .sum();
     }
 
     public static void addDemoDebitAccounts(List<? super DebitAccount> target) {

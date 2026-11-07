@@ -1,5 +1,6 @@
 package bank;
 
+import java.util.Comparator;
 import java.util.List;
 
 /*
@@ -13,17 +14,13 @@ public final class AccountUtils {
     private AccountUtils() {
     }
 
+    // 31.10 этап 9: самый богатый счёт через stream().max()
     public static <T extends BankAccount> T richest(List<T> accounts) {
         if (accounts == null || accounts.isEmpty()) {
             throw new IllegalArgumentException("Список счетов пустой");
         }
-        // берём первый как самый богатый, дальше сравниваем
-        T richest = accounts.get(0);
-        for (T account : accounts) {
-            if (account.getBalance() > richest.getBalance()) {
-                richest = account;
-            }
-        }
-        return richest;
+        return accounts.stream()
+                .max(Comparator.comparingDouble(BankAccount::getBalance))
+                .orElseThrow();
     }
 }

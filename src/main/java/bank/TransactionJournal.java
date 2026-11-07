@@ -40,14 +40,10 @@ public class TransactionJournal {
         }
     }
 
-    // 17.10 этап 3: поиск по счёту линейным проходом
+    // 31.10 этап 9: поиск по счёту через stream().filter()
     public List<Transaction> findByAccount(AccountNumber number) {
-        List<Transaction> result = new ArrayList<>();
-        for (Transaction tx : transactions) {
-            if (tx.account().equals(number)) {
-                result.add(tx);
-            }
-        }
-        return result;
+        return transactions.stream()
+                .filter(tx -> tx.account().equals(number))
+                .toList();
     }
 }
