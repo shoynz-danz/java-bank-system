@@ -617,4 +617,23 @@ public class BankServiceTest {
 
         assertEquals(2, notifiedCount[0]);
     }
+
+    // 07.11 этап 10: проверка LSP (все наследники работают как BankAccount без instanceof)
+    @Test
+    void liskovSubstitutionPrincipleForAllAccounts() {
+        List<BankAccount> accounts = List.of(
+                new DebitAccount("0000000001", "Ivan", 5000),
+                new SavingsAccount("0000000002", "Petr", 5000, 1000),
+                new CreditAccount("0000000003", "Anna", 0, 5000)
+        );
+
+        for (BankAccount account : accounts) {
+            account.deposit(500);
+            account.withdraw(1000);
+        }
+
+        assertEquals(4500, accounts.get(0).getBalance());
+        assertEquals(4500, accounts.get(1).getBalance());
+        assertEquals(-500, accounts.get(2).getBalance());
+    }
 }
