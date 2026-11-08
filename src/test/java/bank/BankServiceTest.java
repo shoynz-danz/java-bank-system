@@ -594,4 +594,20 @@ public class BankServiceTest {
         // Проверяем, что счётчик реально насчитал 2 вызова, проходя через всю цепочку
         assertEquals(2, counter.getCount());
     }
+
+    // 07.11 этап 8: тест паттерна Observer (несколько подписчиков)
+    @Test
+    void transferEventPublisherNotifiesAllListeners() {
+        TransferEventPublisher publisher = new TransferEventPublisher();
+        int[] notifiedCount = {0};
+
+        publisher.subscribe(tx -> notifiedCount[0]++);
+        publisher.subscribe(tx -> notifiedCount[0]++);
+
+        Transaction tx = new Transaction(
+                1L, TransactionType.TRANSFER, new AccountNumber("0000000001"), 500, TransactionStatus.SUCCESS);
+        publisher.publish(tx);
+
+        assertEquals(2, notifiedCount[0]);
+    }
 }
