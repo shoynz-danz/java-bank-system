@@ -1,4 +1,9 @@
-package bank;
+package bank.application;
+
+import bank.DebitAccount;
+import bank.domain.AccountNumber;
+import bank.domain.BankAccount;
+import bank.domain.Transaction;
 
 import java.util.HashMap;
 import java.util.List;

@@ -1,5 +1,7 @@
 package bank;
 
+import bank.domain.BankAccount;
+
 import java.util.Comparator;
 import java.util.List;
 

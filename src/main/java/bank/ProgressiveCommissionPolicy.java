@@ -1,5 +1,7 @@
 package bank;
 
+import bank.domain.CommissionPolicy;
+
 /*
 07.11 этап 3: OCP.
 Прогрессивная комиссия (чем больше сумма, тем больше процент).

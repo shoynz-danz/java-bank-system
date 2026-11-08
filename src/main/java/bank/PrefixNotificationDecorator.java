@@ -1,5 +1,7 @@
 package bank;
 
+import bank.ports.NotificationService;
+
 // 07.11 этап 7: Decorator (добавляет кастомный текст в начало сообщения)
 public class PrefixNotificationDecorator implements NotificationService {
 

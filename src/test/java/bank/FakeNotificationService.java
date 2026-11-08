@@ -1,5 +1,7 @@
 package bank;
 
+import bank.ports.NotificationService;
+
 public class FakeNotificationService implements NotificationService {
     private String lastMessage;
     private int notificationCount;

@@ -1,5 +1,7 @@
 package bank;
 
+import bank.domain.BankAccount;
+
 public class CreditAccount extends BankAccount {
     private final double creditLimit;
 

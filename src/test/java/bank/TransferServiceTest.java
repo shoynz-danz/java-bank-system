@@ -1,5 +1,8 @@
 package bank;
 
+import bank.domain.AccountNumber;
+import bank.domain.Transaction;
+import bank.ports.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;

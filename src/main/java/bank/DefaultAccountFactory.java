@@ -1,5 +1,8 @@
 package bank;
 
+import bank.domain.AccountNumber;
+import bank.domain.BankAccount;
+
 // 07.11 этап 6: Factory (паттерн Фабрика для создания счетов)
 public class DefaultAccountFactory implements AccountFactory {
 

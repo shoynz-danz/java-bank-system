@@ -1,5 +1,8 @@
 package bank;
 
+import bank.domain.AccountNumber;
+import bank.domain.Transaction;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

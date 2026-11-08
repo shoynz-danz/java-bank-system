@@ -1,4 +1,6 @@
-package bank;
+package bank.adapters;
+
+import bank.ports.NotificationService;
 
 // 07.11 этап 5: Adapter (адаптер для порта NotificationService)
 public class ConsoleNotificationAdapter implements NotificationService {

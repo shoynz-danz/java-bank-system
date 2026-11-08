@@ -1,4 +1,4 @@
-package bank;
+package bank.ports;
 
 @FunctionalInterface
 public interface NotificationService {

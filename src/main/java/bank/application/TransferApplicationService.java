@@ -1,9 +1,15 @@
-package bank;
+package bank.application;
 
 /*
 07.11 этап 2: прикладной сервис переводов по номерам счетов (SRP).
 не отвечает за отчёты и аналитику.
  */
+
+import bank.EntityNotFoundException;
+import bank.Repository;
+import bank.TransferService;
+import bank.domain.AccountNumber;
+import bank.domain.BankAccount;
 
 // 07.11 этап 4: DIP (Dependency Inversion Principle).
 // Мы уже зависим от абстракций (интерфейсов Repository и TransferService),

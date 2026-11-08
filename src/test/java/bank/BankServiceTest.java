@@ -1,5 +1,12 @@
 package bank;
 
+import bank.adapters.ConsoleNotificationAdapter;
+import bank.application.AccountService;
+import bank.application.TransferApplicationService;
+import bank.domain.AccountNumber;
+import bank.domain.BankAccount;
+import bank.domain.Transaction;
+import bank.ports.NotificationService;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

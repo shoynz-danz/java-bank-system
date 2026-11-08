@@ -1,5 +1,7 @@
 package bank;
 
+import bank.domain.CommissionPolicy;
+
 /*
 07.11 этап 3: OCP (новая стратегия без изменения старого кода).
 Фиксированная комиссия.

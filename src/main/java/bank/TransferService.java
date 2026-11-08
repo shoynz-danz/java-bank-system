@@ -1,5 +1,10 @@
 package bank;
 
+import bank.domain.BankAccount;
+import bank.domain.CommissionPolicy;
+import bank.domain.Transaction;
+import bank.ports.NotificationService;
+
 public class TransferService {
 
     // максимальная сумма одного перевода

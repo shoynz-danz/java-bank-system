@@ -1,5 +1,7 @@
 package bank;
 
+import bank.domain.Transaction;
+
 import java.util.ArrayList;
 import java.util.List;
 

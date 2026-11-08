@@ -1,5 +1,7 @@
 package bank;
 
+import bank.ports.NotificationService;
+
 // 07.11 этап 7: Decorator (добавляем логирование перед отправкой)
 public class LoggingNotificationDecorator implements NotificationService {
 

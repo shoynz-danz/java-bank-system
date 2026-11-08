@@ -1,4 +1,8 @@
-package bank;
+package bank.application;
+
+import bank.Repository;
+import bank.domain.AccountNumber;
+import bank.domain.BankAccount;
 
 import java.util.Optional;
 

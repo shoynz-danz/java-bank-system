@@ -1,4 +1,7 @@
-package bank;
+package bank.domain;
+
+import bank.Identifiable;
+import bank.InsufficientFundsException;
 
 import java.util.Objects;
 

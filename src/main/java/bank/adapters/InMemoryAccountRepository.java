@@ -1,4 +1,8 @@
-package bank;
+package bank.adapters;
+
+import bank.domain.AccountNumber;
+import bank.domain.BankAccount;
+import bank.ports.AccountRepository;
 
 import java.util.HashMap;
 import java.util.Map;

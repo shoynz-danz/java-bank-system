@@ -1,5 +1,7 @@
 package bank;
 
+import bank.domain.AccountNumber;
+
 /*
 10.10 этап 4: заявка на перевод.
 просто данные, кто кому и сколько, без логики.

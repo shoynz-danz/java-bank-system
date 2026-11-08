@@ -1,5 +1,11 @@
 package bank;
 
+import bank.domain.AccountNumber;
+import bank.domain.BankAccount;
+import bank.domain.CommissionPolicy;
+import bank.domain.Transaction;
+import bank.ports.NotificationService;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;

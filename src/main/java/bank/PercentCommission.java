@@ -1,5 +1,7 @@
 package bank;
 
+import bank.domain.CommissionPolicy;
+
 public class PercentCommission implements CommissionPolicy {
     private final double percent;
 

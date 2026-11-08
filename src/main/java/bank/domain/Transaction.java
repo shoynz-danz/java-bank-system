@@ -1,4 +1,8 @@
-package bank;
+package bank.domain;
+
+import bank.Identifiable;
+import bank.TransactionStatus;
+import bank.TransactionType;
 
 public record Transaction(
         Long id,

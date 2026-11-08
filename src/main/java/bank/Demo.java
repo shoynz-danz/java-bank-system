@@ -1,5 +1,9 @@
 package bank;
 
+import bank.domain.BankAccount;
+import bank.domain.CommissionPolicy;
+import bank.ports.NotificationService;
+
 /*
 14 ЭТАП: простой пример.
 Исключения ловим тут, в точке входа, а не внутри бизнес-классов.

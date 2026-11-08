@@ -1,4 +1,4 @@
-package bank;
+package bank.domain;
 
 public record AccountNumber(String value) {
     public AccountNumber {
