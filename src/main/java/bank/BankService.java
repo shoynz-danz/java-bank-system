@@ -62,6 +62,7 @@ public class BankService {
         return accounts.findById(number);
     }
 
+    @RequiresRole("ADMIN")
     public boolean closeAccount(AccountNumber number) {
         return accounts.deleteById(number);
     }

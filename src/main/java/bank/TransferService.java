@@ -5,6 +5,7 @@ import bank.domain.CommissionPolicy;
 import bank.domain.Transaction;
 import bank.ports.NotificationService;
 
+@Audited
 public class TransferService {
 
     // максимальная сумма одного перевода
