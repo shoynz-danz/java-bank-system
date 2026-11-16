@@ -31,4 +31,38 @@ public class TransactionFileTest {
         assertEquals("id;from;to;amount;status", lines.get(0));
         assertEquals("1;1111111111;TRANSFER;1000.0;SUCCESS", lines.get(1));
     }
+
+    @Test
+    void importLoadsTransactionsAndSkipsHeader(@TempDir Path tempDir) throws IOException {
+        Path file = tempDir.resolve("transactions.csv");
+        Files.write(file, List.of(
+                "id;from;to;amount;status",
+                "1;1111111111;2222222222;1000.0;SUCCESS",
+                "2;3333333333;DEPOSIT;500.0;REJECTED"
+        ));
+
+        TransactionFileImporter importer = new TransactionFileImporter();
+        List<Transaction> loaded = importer.load(file);
+
+        assertEquals(2, loaded.size());
+        assertEquals(1L, loaded.get(0).id());
+        assertEquals(new AccountNumber("1111111111"), loaded.get(0).account());
+        assertEquals(1000.0, loaded.get(0).amount());
+        assertEquals(TransactionStatus.SUCCESS, loaded.get(0).status());
+
+        assertEquals(TransactionType.DEPOSIT, loaded.get(1).type());
+        assertEquals(TransactionStatus.REJECTED, loaded.get(1).status());
+    }
+
+    @Test
+    void importInvalidLineThrowsException(@TempDir Path tempDir) throws IOException {
+        Path file = tempDir.resolve("broken.csv");
+        Files.write(file, List.of(
+                "id;from;to;amount;status",
+                "1;1111111111;broken"
+        ));
+
+        TransactionFileImporter importer = new TransactionFileImporter();
+        assertThrows(IllegalArgumentException.class, () -> importer.load(file));
+    }
 }
