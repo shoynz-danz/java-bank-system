@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 // 14.11 этап 3: импорт транзакций из текстового файла
 public class TransactionFileImporter {
@@ -47,5 +48,14 @@ public class TransactionFileImporter {
         }
         // если в колонке to был номер счёта (как в примере), считаем переводом
         return TransactionType.TRANSFER;
+    }
+
+    // 14.11 этап 4: статистика по большому файлу без readAllLines()
+    public long countSuccessful(Path path) throws IOException {
+        try (Stream<String> lines = Files.lines(path)) {
+            return lines
+                    .filter(line -> line.contains("SUCCESS"))
+                    .count();
+        }
     }
 }

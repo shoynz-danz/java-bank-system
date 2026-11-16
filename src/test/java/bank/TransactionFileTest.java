@@ -65,4 +65,18 @@ public class TransactionFileTest {
         TransactionFileImporter importer = new TransactionFileImporter();
         assertThrows(IllegalArgumentException.class, () -> importer.load(file));
     }
+
+    @Test
+    void countSuccessfulCountsMatchingLines(@TempDir Path tempDir) throws IOException {
+        Path file = tempDir.resolve("big.csv");
+        Files.write(file, List.of(
+                "id;from;to;amount;status",
+                "1;1111111111;2222222222;1000.0;SUCCESS",
+                "2;1111111111;2222222222;500.0;REJECTED",
+                "3;1111111111;2222222222;2000.0;SUCCESS"
+        ));
+
+        TransactionFileImporter importer = new TransactionFileImporter();
+        assertEquals(2L, importer.countSuccessful(file));
+    }
 }
