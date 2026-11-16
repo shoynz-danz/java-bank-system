@@ -354,5 +354,12 @@ public class Main {
                 .map(BankAccount::getBalance)
                 .reduce(0.0, Double::sum);
         System.out.println("сумма через reduce: " + totalReduce);
+
+        // 14.11 этап 11: Reflection inspector
+        System.out.println("----------------------");
+        System.out.println("14.11 11 этап: AnnotationInspector");
+        AnnotationInspector inspector = new AnnotationInspector();
+        inspector.inspect(TransferService.class);
+        inspector.inspect(BankService.class);
     }
 }
