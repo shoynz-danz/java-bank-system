@@ -75,6 +75,15 @@ public class TransferService {
 
         // 21.11 этап 4: перевод как целостная операция (блокируем оба счёта)
         double commission = commissionPolicy.calculate(amount);
+        /*
+        21.11 этап 5: эксперимент с deadlock (client-4: 04->05, client-5: 05->04).
+        Последовательность circular wait:
+        Thread 1 (client-4) locked 04
+        Thread 2 (client-5) locked 05
+        Thread 1 waits for 05
+        Thread 2 waits for 04
+        Оба потока держат по одному счёту и бесконечно ждут второй -> зависание.
+         */
         synchronized (from) {
             synchronized (to) {
                 from.withdraw(amount + commission);
