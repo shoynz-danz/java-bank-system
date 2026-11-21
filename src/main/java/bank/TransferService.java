@@ -73,19 +73,20 @@ public class TransferService {
         // если денег не хватит - InsufficientFundsException уйдёт наружу
         // и до получателя мы не дойдём
 
-        // 21.11 этап 4: перевод как целостная операция (блокируем оба счёта)
+        // 21.11 этап 6: единый глобальный порядок блокировок по номеру счёта (устранение deadlock)
+        BankAccount first;
+        BankAccount second;
+        if (from.getNumber().value().compareTo(to.getNumber().value()) < 0) {
+            first = from;
+            second = to;
+        } else {
+            first = to;
+            second = from;
+        }
+
         double commission = commissionPolicy.calculate(amount);
-        /*
-        21.11 этап 5: эксперимент с deadlock (client-4: 04->05, client-5: 05->04).
-        Последовательность circular wait:
-        Thread 1 (client-4) locked 04
-        Thread 2 (client-5) locked 05
-        Thread 1 waits for 05
-        Thread 2 waits for 04
-        Оба потока держат по одному счёту и бесконечно ждут второй -> зависание.
-         */
-        synchronized (from) {
-            synchronized (to) {
+        synchronized (first) {
+            synchronized (second) {
                 from.withdraw(amount + commission);
                 to.deposit(amount);
             }
