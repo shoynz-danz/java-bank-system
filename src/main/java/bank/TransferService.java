@@ -72,11 +72,15 @@ public class TransferService {
         // снимаем с отправителя сумму вместе с комиссией,
         // если денег не хватит - InsufficientFundsException уйдёт наружу
         // и до получателя мы не дойдём
-        double commission = commissionPolicy.calculate(amount);
-        from.withdraw(amount + commission);
 
-        // деньги зачисляем только после успешного списания
-        to.deposit(amount);
+        // 21.11 этап 4: перевод как целостная операция (блокируем оба счёта)
+        double commission = commissionPolicy.calculate(amount);
+        synchronized (from) {
+            synchronized (to) {
+                from.withdraw(amount + commission);
+                to.deposit(amount);
+            }
+        }
 
         // пишем в журнал только если перевод реально прошёл
         if (journal != null) {
