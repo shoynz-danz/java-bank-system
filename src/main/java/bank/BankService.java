@@ -181,11 +181,20 @@ public class BankService {
                 .findFirst();
     }
 
-    // 31.10 этап 7: числовые stream (sum, average, max)
+    // 21.11 этап 7: консистентный снимок общего баланса (в том же порядке блокировок)
     public double totalBalance() {
-        return accounts.findAll().stream()
-                .mapToDouble(BankAccount::getBalance)
-                .sum();
+        List<BankAccount> sorted = sortedByNumber();
+        return sumLocked(sorted, 0);
+    }
+
+    private double sumLocked(List<BankAccount> sorted, int index) {
+        if (index == sorted.size()) {
+            return 0.0;
+        }
+        BankAccount acc = sorted.get(index);
+        synchronized (acc) {
+            return acc.getBalance() + sumLocked(sorted, index + 1);
+        }
     }
 
     public OptionalDouble averageBalance() {
