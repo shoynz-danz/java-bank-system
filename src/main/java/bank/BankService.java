@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.Optional;
 import java.util.OptionalDouble;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /*
 17.10 этап 1: сервис владеет счетами.
@@ -26,6 +27,8 @@ public class BankService {
     private final Repository<AccountNumber, BankAccount> accounts;
     private final TransferService transferService;
     private final BlockedAccountRegistry blockedAccounts;
+    private final AtomicInteger successfulTransfers = new AtomicInteger();
+    private final AtomicInteger failedTransfers = new AtomicInteger();
 
     public BankService(
             Repository<AccountNumber, BankAccount> accounts,
@@ -67,17 +70,23 @@ public class BankService {
         return accounts.deleteById(number);
     }
 
-    // 17.10 этап 2: перевод по номерам, сами счета достаём внутри
+    // 17.10 этап 2 + 21.11 этап 9: перевод по номерам + потокобезопасные счётчики
     public void transfer(AccountNumber fromNumber, AccountNumber toNumber, double amount) {
-        BankAccount from = accounts.findById(fromNumber);
-        if (from == null) {
-            throw new EntityNotFoundException("счёт не найден");
+        try {
+            BankAccount from = accounts.findById(fromNumber);
+            if (from == null) {
+                throw new EntityNotFoundException("счёт не найден");
+            }
+            BankAccount to = accounts.findById(toNumber);
+            if (to == null) {
+                throw new EntityNotFoundException("счёт не найден");
+            }
+            transferService.transfer(from, to, amount);
+            successfulTransfers.incrementAndGet();
+        } catch (RuntimeException e) {
+            failedTransfers.incrementAndGet();
+            throw e;
         }
-        BankAccount to = accounts.findById(toNumber);
-        if (to == null) {
-            throw new EntityNotFoundException("счёт не найден");
-        }
-        transferService.transfer(from, to, amount);
     }
 
     // 24.10 этап 3: ищем счета по условию, не показываем внутреннее хранилище
@@ -206,5 +215,14 @@ public class BankService {
     public Optional<BankAccount> richestAccount() {
         return accounts.findAll().stream()
                 .max(Comparator.comparingDouble(BankAccount::getBalance));
+    }
+
+    // 21.11 этап 9: потокобезопасная статистика
+    public int successfulTransfers() {
+        return successfulTransfers.get();
+    }
+
+    public int failedTransfers() {
+        return failedTransfers.get();
     }
 }
