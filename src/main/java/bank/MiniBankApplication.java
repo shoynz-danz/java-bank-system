@@ -4,12 +4,11 @@ import bank.domain.AccountNumber;
 import bank.domain.BankAccount;
 import bank.ports.NotificationService;
 
-// 21.11 этап 1-2: симуляция 5 клиентов и проверка банковского инварианта
+// 21.11 этап 8: запуск BankMonitor и graceful shutdown
 public class MiniBankApplication {
 
     public static void main(String[] args) throws InterruptedException {
         Repository<AccountNumber, BankAccount> repo = new InMemoryRepository<>();
-        // без комиссии и без спама в консоль, чтобы деньги не уходили из банка
         NotificationService silent = message -> {};
         TransferService transferService = new TransferService(new NoCommission(), silent);
         BankService bank = new BankService(repo, transferService);
@@ -22,11 +21,16 @@ public class MiniBankApplication {
 
         double initialTotal = bank.totalBalance();
 
+        BankMonitor bankMonitor = new BankMonitor(bank, initialTotal);
+        Thread bankMonitorThread = new Thread(bankMonitor, "bank-monitor");
+
         Thread client1 = new Thread(new ClientWorker(bank, "0000000001", "0000000002", 10_000), "client-1");
         Thread client2 = new Thread(new ClientWorker(bank, "0000000002", "0000000003", 10_000), "client-2");
         Thread client3 = new Thread(new ClientWorker(bank, "0000000003", "0000000001", 10_000), "client-3");
         Thread client4 = new Thread(new ClientWorker(bank, "0000000004", "0000000005", 10_000), "client-4");
         Thread client5 = new Thread(new ClientWorker(bank, "0000000005", "0000000004", 10_000), "client-5");
+
+        bankMonitorThread.start();
 
         client1.start();
         client2.start();
@@ -39,6 +43,11 @@ public class MiniBankApplication {
         client3.join();
         client4.join();
         client5.join();
+
+        // graceful shutdown монитора
+        bankMonitor.stop();
+        bankMonitorThread.interrupt();
+        bankMonitorThread.join();
 
         double finalTotal = bank.totalBalance();
         System.out.println("Initial total: " + initialTotal);
